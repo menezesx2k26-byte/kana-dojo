@@ -10,7 +10,9 @@ it('places the geometric figure before algebra inputs and the secondary ledger i
     sessions: {},
   });
   render(<GeometryDojo />);
-  const figure = await screen.findByRole('img');
+  const figure = await screen.findByRole('img', {
+    name: /^A relação geométrica/,
+  });
   const answer = screen.getByLabelText('Seu resultado');
   const ledger = screen.getByRole('heading', { name: 'LEDGER' });
   expect(

@@ -16,7 +16,9 @@ export function GeometryScene({
   const uid = useId().replace(/:/g, '');
   const framing = [
     ...visual.points,
-    ...(visual.constructions ?? []).flatMap(c => [c.from, c.to]),
+    ...(visual.constructions ?? []).flatMap(c =>
+      c.infinite ? [c.from] : [c.from, c.to],
+    ),
     ...(visual.rightAngles ?? []).map(m => m.at),
   ];
   const f = frameFor(framing),
@@ -168,11 +170,12 @@ export function GeometryScene({
                 />
                 {active ? (
                   <text
-                    x={(start.x + end.x) / 2 - 20}
-                    y={(start.y + end.y) / 2 + 30}
+                    x={(start.x + end.x) / 2 - 65}
+                    y={(start.y + end.y) / 2 - 24}
+                    textAnchor='end'
                     className='scene-side-label'
                   >
-                    lado oposto
+                    {visual.activeVertex ? 'lado oposto' : 'segmento AB'}
                   </text>
                 ) : null}
               </g>
@@ -210,6 +213,7 @@ export function GeometryScene({
             return (
               <line
                 key={`tick${i}`}
+                data-mark='equal'
                 x1={(p.x + q.x) / 2 - dx}
                 y1={(p.y + q.y) / 2 - dy}
                 x2={(p.x + q.x) / 2 + dx}
@@ -234,8 +238,8 @@ export function GeometryScene({
           })}
           {visual.points.map(p => {
             const pos = map(p),
-              dx = p.x < center.x ? -30 : 16,
-              dy = p.y < center.y ? 28 : -19;
+              dx = p.name === 'M' ? -42 : p.x < center.x ? -30 : 16,
+              dy = p.name === 'M' ? 30 : p.y < center.y ? 28 : -19;
             return (
               <g
                 key={p.name}

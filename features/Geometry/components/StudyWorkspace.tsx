@@ -27,6 +27,7 @@ import {
 import { useGeometryStore } from '../store/useGeometryStore';
 import { GeometryVisual } from './GeometryVisual';
 import { StudyLedger } from './StudyLedger';
+import { ConceptComparison } from './ConceptComparison';
 
 const shortName = (id: string) => {
   const q = catalog.find(q => q.id === id)!;
@@ -115,6 +116,10 @@ export function StudyWorkspace({
             visual={activity.visual}
             validated={verified}
           />
+          <details className='comparison-disclosure'>
+            <summary>Mediana, altura ou mediatriz?</summary>
+            <ConceptComparison />
+          </details>
         </div>
         <div className='resolution-column'>
           <section className='statement-panel'>

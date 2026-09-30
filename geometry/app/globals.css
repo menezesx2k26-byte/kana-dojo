@@ -871,3 +871,75 @@ textarea {
   cursor: pointer;
   pointer-events: all;
 }
+.comparison-disclosure {
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.comparison-disclosure summary {
+  padding: 14px 0;
+  min-height: 48px;
+  color: var(--main-color);
+  font:
+    1.15rem Georgia,
+    serif;
+}
+.concept-comparison {
+  padding: 18px 0;
+}
+.comparison-choices {
+  display: flex;
+  gap: 16px;
+  margin: 16px 0;
+}
+.comparison-choices button {
+  flex: 1;
+  text-align: left;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--line);
+  font-size: 15px;
+}
+.comparison-choices button[aria-pressed='true'] {
+  border-color: var(--construction);
+}
+.comparison-choices strong {
+  display: block;
+  color: var(--construction);
+  font:
+    1.05rem Georgia,
+    serif;
+  margin-top: 6px;
+}
+.comparison-caption {
+  padding: 16px 0;
+}
+.comparison-caption h3 {
+  font-size: 1.25rem;
+}
+.comparison-caption p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 700px) {
+  .geometry-scene text {
+    font-size: 32px;
+  }
+  .geometry-scene .scene-side-label {
+    font-size: 26px;
+  }
+  .geometry-scene .scene-angle-label {
+    font-size: 30px;
+  }
+  .comparison-choices {
+    gap: 12px;
+  }
+  .comparison-choices button {
+    font-size: 14px;
+  }
+  .comparison-choices strong {
+    font-size: 15px;
+  }
+}
+.canvas-column:has(details[open]) {
+  position: static;
+}
