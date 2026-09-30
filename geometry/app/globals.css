@@ -211,8 +211,7 @@ main {
   min-width: 0;
 }
 .canvas-column {
-  position: sticky;
-  top: 20px;
+  position: static;
 }
 .resolution-column {
   display: flex;
