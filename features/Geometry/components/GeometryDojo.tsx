@@ -266,7 +266,7 @@ function Workspace({
                     required
                   />
                   <p id='notation' className='input-help'>
-                    Frações, decimais exatos e radicais: 1/2, 0.5, sqrt(221)/2.
+                    Frações, decimais exatos e radicais: 1/2, 0.5, sqrt(2)/3.
                     Para coordenadas com vírgula decimal, use ponto e vírgula
                     entre x e y.
                   </p>
