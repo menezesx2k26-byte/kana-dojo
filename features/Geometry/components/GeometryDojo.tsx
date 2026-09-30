@@ -88,14 +88,14 @@ export function GeometryDojo() {
       </header>
       <div className='context-strip'>
         <span>
-          <span className='live-dot' /> Seu espaço de estudo · 2 de outubro de
-          2026
+          <span className='live-dot' /> Seu espaço de estudo · conceito antes da
+          conta
         </span>
         <span>
           {solved} de {activityList.length} treinos guiados concluídos
         </span>
       </div>
-      <main id='main'>
+      <main id='main' tabIndex={-1}>
         {!store.hydrated ? (
           <p role='status'>Retomando seu ledger local…</p>
         ) : (

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     'Conceito primeiro. Conta depois. Seu treino de geometria com tutor e ledger locais.',
   robots: { index: false, follow: false },
+  icons: { icon: '/favicon.svg' },
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

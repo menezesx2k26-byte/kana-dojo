@@ -103,6 +103,17 @@ summary:focus-visible {
   --opposite: #224f91;
   color-scheme: light;
 }
+.dojo-shell button,
+.dojo-shell summary {
+  min-height: 44px;
+}
+.dojo-header > button {
+  min-width: 44px;
+}
+.concept-tutor:focus-visible {
+  outline: 3px solid var(--main-color);
+  outline-offset: 8px;
+}
 .dojo-header {
   height: 76px;
   display: flex;

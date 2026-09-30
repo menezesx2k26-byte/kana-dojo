@@ -55,8 +55,11 @@ export function AltitudeStudy({ session }: { session: Session }) {
   }
   function select(name: string) {
     if (phase === 0) {
-      if (name === vertex) setPhase(1);
-      else
+      if (name === vertex) {
+        setRoute('');
+        setRationale('');
+        setPhase(1);
+      } else
         conceptError(
           `Nesta construção, comece por ${vertex}. Uma altura parte de um vértice.`,
         );
@@ -175,6 +178,8 @@ export function AltitudeStudy({ session }: { session: Session }) {
           ) : null}
         </div>
         <section
+          id='concept-tutor'
+          tabIndex={-1}
           className='concept-tutor'
           aria-label='Tutor da relação geométrica'
         >
@@ -449,6 +454,9 @@ export function AltitudeStudy({ session }: { session: Session }) {
               variant='ghost'
               onClick={() => {
                 store.reset(id);
+                setDraft(undefined);
+                setRoute('');
+                setRationale('');
                 setProgress({ step: 'altura-c', phase: 0 });
                 setMessage('');
                 setReset(false);
@@ -471,6 +479,9 @@ export function AltitudeStudy({ session }: { session: Session }) {
                   variant='outline'
                   onClick={() => {
                     store.clear();
+                    setDraft(undefined);
+                    setRoute('');
+                    setRationale('');
                     setClear(false);
                     setProgress({ step: 'altura-c', phase: 0 });
                     setMessage('');
