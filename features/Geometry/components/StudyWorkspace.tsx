@@ -27,6 +27,7 @@ import {
 import { useGeometryStore } from '../store/useGeometryStore';
 import { GeometryVisual } from './GeometryVisual';
 import { StudyLedger } from './StudyLedger';
+import { RelationTutor } from './RelationTutor';
 import { ConceptComparison } from './ConceptComparison';
 
 const shortName = (id: string) => {
@@ -68,6 +69,9 @@ export function StudyWorkspace({
     message: string;
     state: string;
   } | null>(null);
+  const [recognized, setRecognized] = useState(
+    !!session.tool && session.rationale.trim().length >= 10,
+  );
   const [resetOpen, setResetOpen] = useState(false),
     [clearOpen, setClearOpen] = useState(false);
   const answerInput = useRef<HTMLInputElement>(null);
@@ -103,7 +107,14 @@ export function StudyWorkspace({
         <Button
           variant='ghost'
           type='button'
-          onClick={() => setResetOpen(v => !v)}
+          onClick={() => {
+            store.reorient(activity.id);
+            setRecognized(false);
+            setAnswer('');
+            setEvidence('');
+            setFeedback(null);
+            setResetOpen(true);
+          }}
         >
           <RotateCcw size={16} /> RESET
         </Button>
@@ -157,34 +168,17 @@ export function StudyWorkspace({
               <h2>
                 <span className='protocol-number'>03</span> FERRAMENTA
               </h2>
-              <label className='sr-only' htmlFor='tool'>
-                Ferramenta escolhida
-              </label>
-              <select
-                id='tool'
-                value={session.tool}
-                onChange={e =>
-                  store.tool(activity.id, e.target.value, session.rationale)
-                }
-              >
-                <option value=''>Escolha seu caminho</option>
-                {activity.tools.map(t => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-              <label htmlFor='rationale' className='small-label'>
-                Por que esse caminho serve ao alvo?
-              </label>
-              <textarea
-                id='rationale'
-                rows={2}
-                maxLength={1000}
-                placeholder='Explique a relação que você pretende usar…'
-                value={session.rationale}
-                onChange={e =>
-                  store.tool(activity.id, session.tool, e.target.value)
-                }
-              />
+              {step && (
+                <RelationTutor
+                  key={step.id}
+                  activity={activity}
+                  step={step}
+                  session={session}
+                  recognized={recognized}
+                  onRecognize={setRecognized}
+                />
+              )}
+              {done && <p>{session.tool}</p>}
             </div>
           </section>
           {resetOpen && (
@@ -256,65 +250,68 @@ export function StudyWorkspace({
                 height='h-1'
               />
             </div>
-            {step && (
-              <>
-                <h3>{step.label}</h3>
-                <p className='tutor-question'>{step.prompt}</p>
-                <form onSubmit={send}>
-                  <label htmlFor='answer'>Seu resultado</label>
-                  <input
-                    id='answer'
-                    ref={answerInput}
-                    autoComplete='off'
-                    maxLength={160}
-                    placeholder={step.placeholder}
-                    value={answer}
-                    onChange={e => setAnswer(e.target.value)}
-                    aria-describedby='notation'
-                    required
-                  />
-                  <p id='notation' className='input-help'>
-                    Frações, decimais exatos e radicais: 1/2, 0.5, sqrt(2)/3.
-                    Para coordenadas com vírgula decimal, use ponto e vírgula
-                    entre x e y.
-                  </p>
-                  <label htmlFor='evidence'>A relação que justifica</label>
-                  <textarea
-                    id='evidence'
-                    rows={2}
-                    maxLength={500}
-                    autoComplete='off'
-                    placeholder='Registre a verificação matemática…'
-                    value={evidence}
-                    onChange={e => setEvidence(e.target.value)}
-                    aria-describedby='proof-help'
-                  />
-                  <p id='proof-help' className='input-help'>
-                    {proofInstructions(activity, step)}
-                  </p>
-                  <div className='tutor-actions'>
-                    <Button type='submit'>
-                      <Check size={16} /> Verificar passo
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      type='button'
-                      onClick={() => store.hint(activity.id, step.id)}
-                    >
-                      <Lightbulb size={16} /> Uma pista
-                    </Button>
-                  </div>
-                </form>
-                {(session.hints[step.id] ?? 0) > 0 && (
-                  <div className='hint-box'>
-                    <span className='eyebrow'>
-                      PISTA {session.hints[step.id]}/3 · Derivado
-                    </span>
-                    <p>{step.hints[(session.hints[step.id] ?? 1) - 1]}</p>
-                  </div>
-                )}
-              </>
-            )}
+            {step &&
+              recognized &&
+              session.tool &&
+              session.rationale.trim().length >= 10 && (
+                <>
+                  <h3>{step.label}</h3>
+                  <p className='tutor-question'>{step.prompt}</p>
+                  <form onSubmit={send}>
+                    <label htmlFor='answer'>Seu resultado</label>
+                    <input
+                      id='answer'
+                      ref={answerInput}
+                      autoComplete='off'
+                      maxLength={160}
+                      placeholder={step.placeholder}
+                      value={answer}
+                      onChange={e => setAnswer(e.target.value)}
+                      aria-describedby='notation'
+                      required
+                    />
+                    <p id='notation' className='input-help'>
+                      Frações, decimais exatos e radicais: 1/2, 0.5, sqrt(2)/3.
+                      Para coordenadas com vírgula decimal, use ponto e vírgula
+                      entre x e y.
+                    </p>
+                    <label htmlFor='evidence'>A relação que justifica</label>
+                    <textarea
+                      id='evidence'
+                      rows={2}
+                      maxLength={500}
+                      autoComplete='off'
+                      placeholder='Registre a verificação matemática…'
+                      value={evidence}
+                      onChange={e => setEvidence(e.target.value)}
+                      aria-describedby='proof-help'
+                    />
+                    <p id='proof-help' className='input-help'>
+                      {proofInstructions(activity, step)}
+                    </p>
+                    <div className='tutor-actions'>
+                      <Button type='submit'>
+                        <Check size={16} /> Verificar passo
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        type='button'
+                        onClick={() => store.hint(activity.id, step.id)}
+                      >
+                        <Lightbulb size={16} /> Uma pista
+                      </Button>
+                    </div>
+                  </form>
+                  {(session.hints[step.id] ?? 0) > 0 && (
+                    <div className='hint-box'>
+                      <span className='eyebrow'>
+                        PISTA {session.hints[step.id]}/3 · Derivado
+                      </span>
+                      <p>{step.hints[(session.hints[step.id] ?? 1) - 1]}</p>
+                    </div>
+                  )}
+                </>
+              )}
             {feedback && (
               <div
                 className={`feedback feedback-${feedback.state}`}

@@ -2,7 +2,13 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/shared/ui/components/button';
 import { altitudeActivity as activity } from '../data/altitudeActivity';
-import { confirmed, currentStep, completed, type Session } from '../lib/tutor';
+import {
+  confirmed,
+  currentStep,
+  completed,
+  type Session,
+  type LedgerEntry,
+} from '../lib/tutor';
 import { altitudeVisual, conceptFeedback } from '../lib/concepts';
 import { useGeometryStore } from '../store/useGeometryStore';
 import { GeometryScene } from './GeometryScene';
@@ -28,6 +34,7 @@ export function AltitudeStudy({ session }: { session: Session }) {
     [compare, setCompare] = useState(false),
     [reset, setReset] = useState(false),
     [clear, setClear] = useState(false);
+  const [draft, setDraft] = useState<LedgerEntry | undefined>();
   const [route, setRoute] = useState(session.tool),
     [rationale, setRationale] = useState(session.rationale);
   const visual = altitudeVisual(
@@ -68,6 +75,8 @@ export function AltitudeStudy({ session }: { session: Session }) {
     setPhase(4);
   }
   function resetLayer() {
+    store.reorient(id);
+    setDraft(undefined);
     setProgress({ step: step?.id, phase: 0 });
     setCompare(false);
     setMessage('');
@@ -347,6 +356,7 @@ export function AltitudeStudy({ session }: { session: Session }) {
                 id={id}
                 session={session}
                 step={step}
+                initial={draft?.step === step.id ? draft : undefined}
                 proofHelp={
                   intersection
                     ? 'Use hC(H)=valor; hA(H)=valor. Substitua H nas duas equações do ledger, escritas com lado esquerdo=0.'
@@ -354,6 +364,10 @@ export function AltitudeStudy({ session }: { session: Session }) {
                 }
                 onOutcome={outcome => {
                   if (outcome.state === 'validado') {
+                    setDraft(undefined);
+                    requestAnimationFrame(() =>
+                      document.getElementById('concept-tutor')?.focus(),
+                    );
                     setMessage(
                       'Passo validado. Ele agora pode ser usado no ledger.',
                     );
@@ -407,6 +421,13 @@ export function AltitudeStudy({ session }: { session: Session }) {
             session={session}
             onReview={e => {
               store.rewind(id, e.step);
+              setDraft(e);
+              if (e.step !== 'ortocentro') {
+                setRoute(activity.tools[0]);
+                store.tool(id, activity.tools[0], session.rationale);
+              } else {
+                store.tool(id, activity.tools[2], session.rationale);
+              }
               setProgress({ step: e.step, phase: 4 });
               setCompare(false);
               setMessage(

@@ -7,6 +7,7 @@ import {
   parseLine,
   parsePoint,
   onLine,
+  sameLine,
   type Linear,
   type Point,
 } from '../lib/math';
@@ -41,6 +42,12 @@ function altitudeStep(vertex: 'C' | 'A'): Step {
         : !equal(dot(parseLine(s)), {})
           ? `A reta passa por ${vertex}, mas não é perpendicular a ${side}. Ponto médio caracteriza a mediana; altura exige 90°. Compare as duas construções e revise a direção.`
           : 'Confira as duas condições da altura.',
+    diagnoseKind: s =>
+      sameLine(parseLine(s), parseLine(first ? 'x=1' : '7x+3y-11=0'))
+        ? 'conceitual'
+        : !onLine(p, parseLine(s))
+          ? 'algebrico'
+          : 'representacao-geometrica',
     evidence: s => [
       [
         proof(`${h}(${vertex})`, residue(parseLine(s), p)),

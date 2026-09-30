@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, type FormEvent } from 'react';
+import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { Button } from '@/shared/ui/components/button';
 import type { Step } from '../data/activities';
 import { evaluate, type Session, type Evaluation } from '../lib/tutor';
@@ -10,20 +10,29 @@ export function StepCalculation({
   session,
   proofHelp,
   onOutcome,
+  initial,
 }: {
   id: string;
   step: Step;
   session: Session;
   proofHelp: string;
+  initial?: { answer: string; evidence: string };
   onOutcome?: (outcome: Evaluation) => void;
 }) {
   const submit = useGeometryStore(s => s.submit),
     hint = useGeometryStore(s => s.hint);
   const pending = session.entries.find(e => e.step === step.id);
-  const [answer, setAnswer] = useState(pending?.answer ?? ''),
-    [evidence, setEvidence] = useState(pending?.evidence ?? '');
+  const [answer, setAnswer] = useState(
+      initial?.answer ?? pending?.answer ?? '',
+    ),
+    [evidence, setEvidence] = useState(
+      initial?.evidence ?? pending?.evidence ?? '',
+    );
   const [feedback, setFeedback] = useState<Evaluation | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    input.current?.focus();
+  }, []);
   function send(event: FormEvent) {
     event.preventDefault();
     const outcome = evaluate(id, session, step, answer, evidence);

@@ -74,3 +74,20 @@ it('replays exact math on hydration and refuses a forged premature orthocenter',
   };
   expect(confirmed(validateStoredSession(id, forged))).toEqual({});
 });
+it('resets only the unconfirmed current layer and retains the first conceptual divergence', async () => {
+  const { resetLayer } = await import('./tutor');
+  let s = submit(id, start(), 'x-2y+3=0', 'hC(C)=0;v_AB.v_hC=0');
+  s = submit(id, s, 'y=x', 'hA(A)=0;v_BC.v_hA=0');
+  const reset = resetLayer(id, s);
+  expect(confirmed(reset)['altura-c']).toBeTruthy();
+  expect(reset.entries).toHaveLength(1);
+  expect(reset.firstDivergence).toEqual(s.firstDivergence);
+});
+it('classifies malformed notation independently from conceptual geometry mistakes', () => {
+  expect(evaluate(id, start(), activities[id].steps[0], 'x=1', '').kind).toBe(
+    'conceitual',
+  );
+  expect(
+    evaluate(id, start(), activities[id].steps[0], 'sin(x)', '').kind,
+  ).toBe('notacional');
+});

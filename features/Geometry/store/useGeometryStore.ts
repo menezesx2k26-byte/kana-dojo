@@ -6,11 +6,12 @@ import {
   type StateStorage,
 } from 'zustand/middleware';
 import type { DiagnosticKind } from '../lib/concepts';
-import { activities } from '../data/activities';
+import { activities, catalog } from '../data/activities';
 import {
   emptySession,
   submit,
   rewind,
+  resetLayer,
   validateStoredSession,
   type Session,
 } from '../lib/tutor';
@@ -66,6 +67,7 @@ interface GeometryState {
     message: string,
     kind: DiagnosticKind,
   ) => void;
+  reorient: (id: string) => void;
   reset: (id: string) => void;
   clear: () => void;
   toggleTheme: () => void;
@@ -139,6 +141,13 @@ export const useGeometryStore = create<GeometryState>()(
             },
           };
         }),
+      reorient: id =>
+        set(s => ({
+          sessions: {
+            ...s.sessions,
+            [id]: resetLayer(id, s.sessions[id] ?? emptySession()),
+          },
+        })),
       reset: id =>
         set(s => ({ sessions: { ...s.sessions, [id]: emptySession() } })),
       clear: () => {
@@ -174,7 +183,7 @@ export const useGeometryStore = create<GeometryState>()(
           selected:
             typeof saved.selected === 'string' &&
             (!!activities[saved.selected] ||
-              /^lista-[12]-q\d\d$/.test(saved.selected))
+              catalog.some(q => q.id === saved.selected))
               ? saved.selected
               : 'altura-ortocentro',
           theme: saved.theme === 'dark' ? 'dark' : 'light',

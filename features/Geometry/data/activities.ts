@@ -1,3 +1,4 @@
+import type { DiagnosticKind } from '../lib/concepts';
 import { altitudeActivity } from './altitudeActivity';
 import type { Construction, RightAngle, EqualMark } from '../lib/scene';
 import rawCatalog from './catalog.json';
@@ -41,6 +42,10 @@ export interface Step {
   requires: string[];
   check: (answer: string, answers: Record<string, string>) => boolean;
   diagnose?: (answer: string, answers: Record<string, string>) => string;
+  diagnoseKind?: (
+    answer: string,
+    answers: Record<string, string>,
+  ) => DiagnosticKind;
   evidence?: (answer: string, answers: Record<string, string>) => Evidence[][];
   vectorProof?: {
     label: string;

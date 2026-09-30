@@ -29,6 +29,7 @@ export interface Session {
   };
 }
 export interface Evaluation {
+  kind?: DiagnosticKind;
   state: LedgerEntry['state'] | 'ambigua' | 'incompativel' | 'bloqueada';
   message: string;
 }
@@ -128,12 +129,14 @@ export function evaluate(
   if (next?.id !== step.id || step.requires.some(k => !answers[k]))
     return {
       state: 'bloqueada',
+      kind: 'interpretacao',
       message:
         'Valide os passos anteriores antes de usar esses resultados como premissas.',
     };
   if (!session.tool || session.rationale.trim().length < 10)
     return {
       state: 'bloqueada',
+      kind: 'interpretacao',
       message:
         'Registre a ferramenta e explique por que ela aproxima você do alvo.',
     };
@@ -148,6 +151,9 @@ export function evaluate(
     if (!step.check(answer, answers)) {
       return {
         state: 'incompativel',
+        kind:
+          step.diagnoseKind?.(answer, answers) ??
+          (step.kind === 'membership' ? 'interpretacao' : 'algebrico'),
         message: step.diagnose?.(answer, answers) ?? step.divergence,
       };
     }
@@ -171,6 +177,7 @@ export function evaluate(
   } catch (error) {
     return {
       state: 'ambigua',
+      kind: 'notacional',
       message:
         error instanceof Error
           ? error.message
@@ -194,7 +201,12 @@ export function submit(
     session.firstDivergence ??
     (result.state === 'incompativel' ||
     (result.state === 'calculado' && !!evidence.trim())
-      ? { step: step.id, message: result.message, corrected: false }
+      ? {
+          step: step.id,
+          message: result.message,
+          corrected: false,
+          kind: result.kind ?? 'algebrico',
+        }
       : undefined);
   const fixed =
     result.state === 'validado' && firstDivergence?.step === step.id;
@@ -216,6 +228,18 @@ export function submit(
     firstDivergence: firstDivergence
       ? { ...firstDivergence, corrected: fixed || firstDivergence.corrected }
       : undefined,
+  };
+}
+export function resetLayer(id: string, session: Session): Session {
+  const step = currentStep(id, session);
+  const hints = { ...session.hints };
+  if (step) delete hints[step.id];
+  return {
+    ...session,
+    entries: session.entries.filter(
+      e => e.state === 'validado' || e.state === 'corrigido',
+    ),
+    hints,
   };
 }
 export function rewind(id: string, session: Session, stepId: string): Session {

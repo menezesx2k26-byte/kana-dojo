@@ -1,13 +1,20 @@
 import { afterEach, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { GeometryDojo } from './GeometryDojo';
+import { emptySession } from '../lib/tutor';
 import { useGeometryStore } from '../store/useGeometryStore';
 afterEach(cleanup);
 it('places the geometric figure before algebra inputs and the secondary ledger in reading order', async () => {
   useGeometryStore.setState({
     hydrated: true,
     selected: 'lista-2-q01',
-    sessions: {},
+    sessions: {
+      'lista-2-q01': {
+        ...emptySession(),
+        tool: 'Ponto médio + determinante',
+        rationale: 'O meio de BC determina a reta com A.',
+      },
+    },
   });
   render(<GeometryDojo />);
   const figure = await screen.findByRole('img', {
