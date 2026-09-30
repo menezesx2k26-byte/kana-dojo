@@ -3,6 +3,10 @@
   "version": "0.1.19",
   "private": true,
   "scripts": {
+    "geometry:dev": "next dev geometry -p 3100",
+    "geometry:build": "tsx scripts/build-geometry.ts",
+    "geometry:test": "vitest run --config geometry/vitest.config.ts",
+    "geometry:check": "tsc --noEmit -p geometry/tsconfig.json && eslint features/Geometry geometry/app scripts/build-geometry.ts",
     "prepare": "husky",
     "predev": "node scripts/generate-commit-info.mjs",
     "dev": "next dev --turbo",

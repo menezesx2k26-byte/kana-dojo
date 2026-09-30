@@ -76,3 +76,10 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Dedicated geometry profile (generated public files are reproducible)
+/geometry/.next/
+/geometry/out/
+/geometry/visual-out/
+/geometry/public/geogebra.html
+/geometry/public/LICENSE.txt

@@ -1,0 +1,6 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Robots-Tag: noindex, nofollow
+  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' https://*.geogebra.org https://*.geogebra.net; style-src 'unsafe-inline' https://*.geogebra.org https://fonts.googleapis.com; img-src data: blob: https://*.geogebra.org https://*.geogebra.net; font-src data: https://*.geogebra.org https://fonts.gstatic.com; connect-src https://*.geogebra.org https://*.geogebra.net; worker-src blob:; frame-src 'self' https://*.geogebra.org; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors http://127.0.0.1:3100 https://*.geometria-analitica-dojo.pages.dev
