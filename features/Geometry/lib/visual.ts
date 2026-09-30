@@ -12,6 +12,18 @@ export function visibleVisual(
     points,
     lines: visual.lines?.filter(l => !l.after || !!validated[l.after]),
     segments: visual.segments?.filter(([a, b]) => names.has(a) && names.has(b)),
+    constructions: visual.constructions?.filter(
+      c => !c.after || !!validated[c.after],
+    ),
+    rightAngles: visual.rightAngles?.filter(
+      c => !c.after || !!validated[c.after],
+    ),
+    equalMarks: visual.equalMarks?.filter(
+      c => !c.after || !!validated[c.after],
+    ),
+    extensions: visual.extensions?.filter(
+      c => !c.after || !!validated[c.after],
+    ),
   };
 }
 /** Only authored construction data enters this document, never user input or storage. */

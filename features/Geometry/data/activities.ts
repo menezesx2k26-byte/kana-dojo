@@ -1,3 +1,4 @@
+import type { Construction, RightAngle, EqualMark } from '../lib/scene';
 import rawCatalog from './catalog.json';
 import {
   add,
@@ -63,6 +64,12 @@ export interface Visual {
   points: PlotPoint[];
   lines?: { equation: string; after?: string }[];
   segments?: [string, string][];
+  constructions?: Construction[];
+  rightAngles?: RightAngle[];
+  equalMarks?: EqualMark[];
+  activeVertex?: string;
+  oppositeSide?: [string, string];
+  extensions?: Construction[];
 }
 export interface Activity {
   id: string;
@@ -278,6 +285,9 @@ const all: Activity[] = [
         { name: 'O', x: 0, y: 0 },
         { name: 'H', x: 3, y: 0 },
       ],
+      rightAngles: [
+        { at: { x: 3, y: 0 }, along: { x: -1, y: 0 }, toward: { x: 0, y: -1 } },
+      ],
       segments: [
         ['P', 'H'],
         ['H', 'O'],
@@ -306,6 +316,10 @@ const all: Activity[] = [
         { name: 'Q', x: 3, y: -4 },
         { name: 'R', x: -5, y: 2 },
         { name: 'M', x: -2, y: 1.5, revealAfter: 'medio' },
+      ],
+      equalMarks: [
+        { a: { x: 1, y: 1 }, b: { x: -2, y: 1.5 }, after: 'medio' },
+        { a: { x: -2, y: 1.5 }, b: { x: -5, y: 2 }, after: 'medio' },
       ],
       segments: [
         ['P', 'Q'],
@@ -439,6 +453,14 @@ const all: Activity[] = [
       description:
         'P e a reta dada r estão visíveis. A perpendicular s aparece somente depois da validação.',
       points: [{ name: 'P', x: 4, y: 2 }],
+      rightAngles: [
+        {
+          at: { x: 1.2, y: 3.4 },
+          along: { x: 1, y: 2 },
+          toward: { x: 2, y: -1 },
+          after: 'reta',
+        },
+      ],
       lines: [{ equation: 'y=2x+1' }, { equation: 'x+2y-8=0', after: 'reta' }],
     },
     note: 'O teste por produto de vetores normais também aceita equações em formas gerais equivalentes.',
@@ -489,6 +511,18 @@ const all: Activity[] = [
         { name: 'B', x: 5, y: 4 },
         { name: 'M', x: 3, y: 1, revealAfter: 'medio' },
       ],
+      equalMarks: [
+        { a: { x: 1, y: -2 }, b: { x: 3, y: 1 }, after: 'medio' },
+        { a: { x: 3, y: 1 }, b: { x: 5, y: 4 }, after: 'medio' },
+      ],
+      rightAngles: [
+        {
+          at: { x: 3, y: 1 },
+          along: { x: 2, y: 3 },
+          toward: { x: 3, y: -2 },
+          after: 'reta',
+        },
+      ],
       segments: [['A', 'B']],
       lines: [{ equation: '2x+3y-9=0', after: 'reta' }],
     },
@@ -534,6 +568,14 @@ const all: Activity[] = [
         { name: 'H', x: 71 / 13, y: 69 / 13, revealAfter: 'distancia' },
       ],
       lines: [{ equation: '2x-3y+5=0' }],
+      rightAngles: [
+        {
+          at: { x: 71 / 13, y: 69 / 13 },
+          along: { x: 3, y: 2 },
+          toward: { x: -2, y: 3 },
+          after: 'distancia',
+        },
+      ],
       segments: [['P', 'H']],
     },
     note: 'Equações proporcionais produzem a mesma distância: o fator é cancelado pelo módulo e pela norma.',

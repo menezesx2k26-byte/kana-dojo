@@ -758,3 +758,116 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+.geometry-figure {
+  margin: 0;
+  position: relative;
+}
+.geometry-scene {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: var(--field);
+}
+.geometry-scene text {
+  font:
+    22px Georgia,
+    serif;
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--field);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.scene-grid {
+  stroke: var(--muted);
+  stroke-width: 0.6;
+  opacity: 0.12;
+}
+.scene-axes {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.25;
+}
+.scene-side {
+  stroke: var(--text);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.65;
+}
+.scene-opposite {
+  stroke: var(--opposite);
+  stroke-width: 4;
+  opacity: 1;
+}
+.geometry-scene .scene-side-label {
+  fill: var(--opposite);
+  font:
+    17px Arial,
+    sans-serif;
+}
+.scene-line {
+  stroke: var(--opposite);
+  stroke-width: 3;
+}
+.scene-line-1 {
+  stroke: var(--construction);
+  stroke-dasharray: 10 4;
+}
+.scene-extension {
+  stroke: var(--opposite);
+  stroke-width: 2;
+  stroke-dasharray: 7 7;
+  opacity: 0.65;
+}
+.scene-construction {
+  stroke: var(--construction);
+  stroke-width: 3.5;
+}
+.scene-median {
+  stroke-dasharray: 12 5;
+}
+.scene-bisector {
+  stroke-dasharray: 4 5;
+}
+.scene-point {
+  fill: var(--text);
+}
+.scene-active {
+  fill: var(--construction);
+}
+.scene-halo {
+  fill: none;
+  stroke: var(--construction);
+  stroke-width: 2;
+}
+.scene-right-angle {
+  stroke: var(--construction);
+  stroke-width: 3;
+  fill: none;
+}
+.geometry-scene .scene-angle-label {
+  fill: var(--construction);
+  font:
+    20px Arial,
+    sans-serif;
+}
+.scene-tick {
+  stroke: var(--construction);
+  stroke-width: 3;
+}
+.scene-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+}
+.scene-selection button {
+  border-bottom: 1px solid var(--line);
+  padding: 8px 12px;
+  min-height: 44px;
+  color: var(--main-color);
+}
+.scene-touch {
+  cursor: pointer;
+  pointer-events: all;
+}
