@@ -22,3 +22,44 @@ it('places the geometric figure before algebra inputs and the secondary ledger i
     figure.compareDocumentPosition(ledger) & Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy();
 });
+it('constructs the altitude tool from geometry and treats midpoint confusion before any algebra input', async () => {
+  localStorage.clear();
+  useGeometryStore.setState({
+    hydrated: true,
+    selected: 'altura-ortocentro',
+    sessions: {},
+  });
+  render(<GeometryDojo />);
+  expect(
+    await screen.findByRole('heading', { name: 'O encontro das alturas' }),
+  ).toBeTruthy();
+  expect(screen.queryByLabelText('Seu resultado')).toBeNull();
+  const { fireEvent } = await import('@testing-library/react');
+  fireEvent.click(screen.getByRole('button', { name: 'Vértice C' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Lado AB' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Passar pelo ponto médio' }),
+  );
+  expect(
+    screen.getByRole('region', {
+      name: 'Comparar mediana, altura e mediatriz',
+    }),
+  ).toBeTruthy();
+  expect(screen.queryByLabelText('Seu resultado')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Perpendicular · 90°' }));
+  fireEvent.click(screen.getByRole('button', { name: /Inclinações ·/ }));
+  fireEvent.change(
+    screen.getByLabelText('Por que esta relação encontra a altura?'),
+    {
+      target: {
+        value: 'A perpendicular passa por C e forma ângulo reto com AB.',
+      },
+    },
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Construir a equação' }));
+  expect(screen.getByLabelText('Seu resultado')).toBeTruthy();
+  expect(
+    useGeometryStore.getState().sessions['altura-ortocentro'].firstDivergence
+      ?.kind,
+  ).toBe('conceitual');
+});

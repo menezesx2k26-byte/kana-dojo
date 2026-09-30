@@ -943,3 +943,127 @@ textarea {
 .canvas-column:has(details[open]) {
   position: static;
 }
+.study-brief {
+  display: flex;
+  gap: 32px;
+  justify-content: space-between;
+  padding: 18px 0 22px;
+  margin-bottom: 24px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.study-brief h2 {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.study-brief p {
+  font-size: 15px;
+}
+.study-brief .math-givens {
+  font:
+    1.2rem/1.6 Georgia,
+    serif;
+}
+.scene-heading h2 {
+  font:
+    1.5rem Georgia,
+    serif;
+  margin: 8px 0 18px;
+}
+.scene-caption {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.concept-tutor > h3 {
+  margin: 12px 0 16px;
+}
+.concept-tutor > p {
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+.relation-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 18px 0;
+}
+.relation-choices button {
+  text-align: left;
+  padding: 12px 16px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 15px;
+  border-radius: 3px;
+}
+.relation-choices button:hover,
+.relation-choices button[aria-pressed='true'] {
+  border-color: var(--main-color);
+  background: var(--card-color);
+}
+.concept-tutor form > button {
+  margin-top: 16px;
+  min-height: 44px;
+}
+.constructed-tool {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.constructed-tool strong {
+  color: var(--main-color);
+}
+.tutor-calculation h3 {
+  margin-top: 18px;
+}
+.proof-label {
+  margin-top: 18px;
+}
+.notation-help {
+  color: var(--muted);
+  font-size: 13px;
+}
+.notation-help summary {
+  min-height: 44px;
+  padding: 12px 0;
+}
+.notation-help p {
+  padding-bottom: 12px;
+}
+.exploration-disclosure {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.exploration-disclosure > summary {
+  padding: 14px 0;
+  color: var(--main-color);
+  min-height: 48px;
+}
+.completion .completion-answer {
+  color: var(--main-color);
+  font:
+    2rem Georgia,
+    serif;
+}
+@media (max-width: 700px) {
+  .study-brief {
+    display: block;
+    padding: 14px 0;
+    margin-bottom: 18px;
+  }
+  .study-brief > div + div {
+    margin-top: 12px;
+  }
+  .study-brief .math-givens {
+    font-size: 17px;
+  }
+  .altitude-study .canvas-column {
+    margin-bottom: 8px;
+  }
+  .scene-heading h2 {
+    font-size: 1.35rem;
+  }
+}

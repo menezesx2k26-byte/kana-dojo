@@ -6,6 +6,7 @@ import { activities, activityList, catalog } from '../data/activities';
 import { emptySession, completed } from '../lib/tutor';
 import { useGeometryStore, hydrateGeometry } from '../store/useGeometryStore';
 import { StudyWorkspace } from './StudyWorkspace';
+import { AltitudeStudy } from './AltitudeStudy';
 const shortName = (id: string) => {
   const q = catalog.find(q => q.id === id)!;
   return `Lista ${q.list} · Q${q.number}`;
@@ -20,8 +21,8 @@ export function GeometryDojo() {
     void hydrateGeometry();
   }, []);
   const selected = catalog.find(q => q.id === store.selected) ?? catalog[30];
-  const activity = activities[selected.id],
-    session = store.sessions[selected.id] ?? emptySession();
+  const activity = activities[store.selected],
+    session = store.sessions[store.selected] ?? emptySession();
   const solved = Object.entries(store.sessions).filter(([id, s]) =>
     completed(id, s),
   ).length;
@@ -49,6 +50,15 @@ export function GeometryDojo() {
           <span className='preview-badge'>PRÉVIA</span>
         </a>
         <nav aria-label='Navegação principal'>
+          <button
+            type='button'
+            onClick={() => {
+              store.select('altura-ortocentro');
+              setView('study');
+            }}
+          >
+            Alturas
+          </button>
           <button
             type='button'
             className={view === 'study' ? 'active-nav' : ''}
@@ -96,13 +106,18 @@ export function GeometryDojo() {
                 nesta sessão; mantenha uma cópia das suas anotações.
               </p>
             )}
-            {view === 'study' && activity && (
-              <StudyWorkspace
-                key={activity.id}
-                activity={activity}
-                session={session}
-              />
+            {view === 'study' && activity?.id === 'altura-ortocentro' && (
+              <AltitudeStudy session={session} />
             )}
+            {view === 'study' &&
+              activity &&
+              activity.id !== 'altura-ortocentro' && (
+                <StudyWorkspace
+                  key={activity.id}
+                  activity={activity}
+                  session={session}
+                />
+              )}
             {view === 'study' && !activity && (
               <section className='unavailable'>
                 <button

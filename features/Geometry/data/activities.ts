@@ -1,3 +1,4 @@
+import { altitudeActivity } from './altitudeActivity';
 import type { Construction, RightAngle, EqualMark } from '../lib/scene';
 import rawCatalog from './catalog.json';
 import {
@@ -583,7 +584,7 @@ const all: Activity[] = [
 ];
 
 export const activities: Record<string, Activity> = Object.fromEntries(
-  all.map(a => [a.id, a]),
+  [...all, altitudeActivity].map(a => [a.id, a]),
 );
 const editorial: Record<string, string> = {
   'lista-2-q01':
@@ -608,4 +609,4 @@ export const catalog: Question[] = rawCatalog.map(q => ({
   ...q,
   statement: editorial[q.id] ?? q.statement,
 }));
-export const activityList = all;
+export const activityList = [...all, altitudeActivity];

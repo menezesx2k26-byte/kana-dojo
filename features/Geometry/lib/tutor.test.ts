@@ -148,8 +148,12 @@ describe('tutor and dependency ledger', () => {
       s.entries.length,
     );
   });
-  it('has no unsupported active questions', () =>
-    expect(activityList.every(a => catalog.some(q => q.id === a.id))).toBe(
-      true,
-    ));
+  it('has no active exercise without an original source or an explicitly labeled derived reference', () =>
+    expect(
+      activityList.every(
+        a =>
+          catalog.some(q => q.id === a.id) ||
+          (a.id === 'altura-ortocentro' && a.reference.startsWith('Derivado:')),
+      ),
+    ).toBe(true));
 });

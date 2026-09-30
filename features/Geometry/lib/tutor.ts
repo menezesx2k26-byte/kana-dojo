@@ -1,3 +1,4 @@
+import type { DiagnosticKind } from './concepts';
 import { activities, type Step } from '../data/activities';
 import {
   parseLine,
@@ -20,7 +21,12 @@ export interface Session {
   tool: string;
   rationale: string;
   hints: Record<string, number>;
-  firstDivergence?: { step: string; message: string; corrected: boolean };
+  firstDivergence?: {
+    step: string;
+    message: string;
+    corrected: boolean;
+    kind?: DiagnosticKind;
+  };
 }
 export interface Evaluation {
   state: LedgerEntry['state'] | 'ambigua' | 'incompativel' | 'bloqueada';
@@ -251,6 +257,7 @@ export function validateStoredSession(
       step: diagnostic.step,
       message: diagnostic.message.slice(0, 500),
       corrected: false,
+      kind: diagnostic.kind,
     };
   }
   // Re-run the mathematical authority on hydration. Never trust a stored status.

@@ -5,6 +5,7 @@ import {
   createJSONStorage,
   type StateStorage,
 } from 'zustand/middleware';
+import type { DiagnosticKind } from '../lib/concepts';
 import { activities } from '../data/activities';
 import {
   emptySession,
@@ -59,6 +60,12 @@ interface GeometryState {
   submit: (id: string, answer: string, evidence: string) => void;
   hint: (id: string, step: string) => void;
   rewind: (id: string, step: string) => void;
+  diagnose: (
+    id: string,
+    step: string,
+    message: string,
+    kind: DiagnosticKind,
+  ) => void;
   reset: (id: string) => void;
   clear: () => void;
   toggleTheme: () => void;
@@ -67,8 +74,8 @@ export const useGeometryStore = create<GeometryState>()(
   persist(
     set => ({
       sessions: {},
-      selected: 'lista-2-q01',
-      theme: 'dark',
+      selected: 'altura-ortocentro',
+      theme: 'light',
       hydrated: false,
       durable: true,
       select: selected => set({ selected }),
@@ -114,10 +121,28 @@ export const useGeometryStore = create<GeometryState>()(
             [id]: rewind(id, s.sessions[id] ?? emptySession(), step),
           },
         })),
+      diagnose: (id, step, message, kind) =>
+        set(s => {
+          const session = s.sessions[id] ?? emptySession();
+          return {
+            sessions: {
+              ...s.sessions,
+              [id]: {
+                ...session,
+                firstDivergence: session.firstDivergence ?? {
+                  step,
+                  message,
+                  kind,
+                  corrected: false,
+                },
+              },
+            },
+          };
+        }),
       reset: id =>
         set(s => ({ sessions: { ...s.sessions, [id]: emptySession() } })),
       clear: () => {
-        set({ sessions: {}, selected: 'lista-2-q01' });
+        set({ sessions: {}, selected: 'altura-ortocentro' });
         storage.removeItem(STORAGE_KEY);
       },
       toggleTheme: () =>
@@ -148,10 +173,11 @@ export const useGeometryStore = create<GeometryState>()(
           sessions,
           selected:
             typeof saved.selected === 'string' &&
-            /^lista-[12]-q\d\d$/.test(saved.selected)
+            (!!activities[saved.selected] ||
+              /^lista-[12]-q\d\d$/.test(saved.selected))
               ? saved.selected
-              : 'lista-2-q01',
-          theme: saved.theme === 'light' ? 'light' : 'dark',
+              : 'altura-ortocentro',
+          theme: saved.theme === 'dark' ? 'dark' : 'light',
         };
       },
     },
