@@ -4,44 +4,57 @@ Perfil dedicado dentro do fork real de [Kana Dojo](https://github.com/lingdojo/k
 
 ## Executar e verificar
 
-```powershell
+```bash
 npm ci --no-audit --no-fund
 npm run geometry:test
 npm run geometry:check
 npm run geometry:build
 node scripts/serve-geometry.mjs
 # Em outro terminal, para o GeoGebra local:
-$env:GEOMETRY_PORT='3101'
-node scripts/serve-geometry.mjs
+GEOMETRY_PORT=3101 node scripts/serve-geometry.mjs
+# Com os dois servidores prontos:
+npm run geometry:browser
 ```
 
-Abra http://127.0.0.1:3100. Os artefatos são `geometry/out` e `geometry/visual-out`. O segundo contém exclusivamente construções e nenhuma interface de respostas. Para publicar, configure `NEXT_PUBLIC_GEOMETRY_VISUAL_ORIGIN` com a URL imutável da prévia visual do projeto Pages dedicado `geometria-analitica-dojo`. O build aceita apenas esse projeto e a origem local de teste. A produção/main nunca precisa ser publicada. Não use o build principal do Kana Dojo para este produto.
+Abra http://127.0.0.1:3100. Os artefatos são `geometry/out` e `geometry/visual-out`. O segundo contém exclusivamente construções, sem interface de respostas. O servidor de verificação aplica os mesmos `_headers`/CSP do export. `geometry:browser` usa o Playwright existente e Chromium real, salva 32 capturas e `report.json` em `geometry/browser-evidence` (ignorado pelo Git). Variáveis opcionais: `GEOMETRY_BASE_URL`, `GEOMETRY_EVIDENCE_DIR`, `GEOMETRY_CHROMIUM_PATH` e `GEOMETRY_BROWSER_PROXY`. O proxy herdado de `HTTPS_PROXY` atende recursos externos; localhost continua local.
+
+Para publicar a prévia autorizada, configure `NEXT_PUBLIC_GEOMETRY_VISUAL_ORIGIN` com a URL imutável da prévia visual do projeto Pages dedicado `geometria-analitica-dojo`, referido no handoff. O build aceita apenas esse projeto e a origem local de teste. A origem visual deve diferir da origem de estudo. Não use o build principal do Kana Dojo para este produto. Verifique acesso e existência do projeto antes de publicar; este ambiente não dispõe de autenticação Cloudflare.
+
+## Figura e tutor
+
+A resolução começa com DADOS, ALVO e uma figura ampla, com escala igual nos dois eixos. O ledger fica abaixo da construção. Em mobile, a ordem de leitura mantém a figura antes da ferramenta e dos campos algébricos. Papel claro e tinta azul, com alternativa escura, substituem o painel de cartões. O SVG semântico desenha vértices ativos, lado oposto, projeções, prolongamentos, marcas de congruência, quadrados e rótulos de 90°. Traços diferentes distinguem construções sem depender somente de cor; botões equivalentes permitem selecionar vértices/lados por teclado.
+
+`GeometryDojo` organiza navegação e catálogo. `StudyWorkspace` atende os sete treinos originais; `AltitudeStudy` conduz a nova construção. `GeometryScene` e `lib/scene` cuidam da representação; `ConceptComparison` distingue mediana, altura e mediatriz. `RelationTutor` reconhece a relação antes de construir uma ferramenta, com reflexão aberta. `StepCalculation` recebe resultado e evidência. `StudyLedger`, tutor determinístico e store persistente continuam responsáveis por premissas e revisão.
+
+A nova atividade `altura-ortocentro` usa A=(2,-1), B=(0,3), C=(1,2). O aluno seleciona C, reconhece AB como lado oposto e escolhe perpendicularidade; então traduz 90° por inclinações ou produto escalar. Repete por A/BC e resolve o sistema de duas alturas distintas. A conta aceita, entre outras formas, `x-2y+3=0`, `y=x/2+3/2`, `y-2=(1/2)(x-1)` para a primeira altura e `x-y-3=0`, `y=x-3` para a segunda. H=(9,6) precisa satisfazer ambas as retas validadas.
+
+Antes dessa validação, a figura mostra somente trechos finitos das alturas, sem H ou retas completas que revelem a interseção. Depois, exibe o ortocentro externo e a conclusão. Confundir ponto médio com altura abre a comparação geométrica. O tutor distingue erros conceituais, algébricos, notacionais, de interpretação e de representação. Ambiguidade pede esclarecimento sem penalidade. Uma resposta correta sem evidência fica calculada, sem liberar premissas.
+
+RESET remove tentativas/hints da etapa atual, preserva entradas validadas e a primeira divergência, e reorienta com dados, alvo, premissas e próximo passo. Revisar uma altura invalida o ortocentro e restaura a resposta anterior para edição. Recomeçar o treino e limpar os dados são ações separadas. Foco acompanha a próxima relação ou campo de cálculo; botões possuem altura mínima de 44px e campos usam ao menos 16px em mobile. Movimento reduzido é respeitado.
 
 ## Conteúdo e limites
 
-O catálogo preserva 30 IDs da Lista 1 e 49 da Lista 2. Os sete treinos completos são Lista 1 Q2/Q7 e Lista 2 Q1/Q4/Q15/Q16/Q30, revisados contra as fontes originais do handoff. Os outros 72 itens são consulta, com verificador pendente; figuras e transcrições tipográficas dessas consultas ainda requerem revisão contra os PDFs. Q5/Q49 da Lista 2 estão pendentes de fonte para parábolas.
+O catálogo preserva 30 IDs da Lista 1 e 49 da Lista 2. Os sete treinos originais são Lista 1 Q2/Q7 e Lista 2 Q1/Q4/Q15/Q16/Q30, revisados contra as fontes do handoff. O novo estudo de alturas é explicitamente **Derivado**, separado dos 79 enunciados: o triângulo solicitado não consta dessas listas. Há oito treinos completos; os outros 72 itens são consulta, com verificador pendente. Figuras e transcrições tipográficas dessas consultas ainda requerem revisão contra os PDFs. Q5/Q49 da Lista 2 permanecem pendentes de fonte para parábolas.
 
 O catálogo registra lista, questão, página, procedência e SHA-256 da fonte. Os originais permanecem no pacote privado `Geometria-Anal-tica-WebApp`, branch `docs/geometry-analitica-handoff`, commit `9f45ca563a2e2b64795ed4d484bfdc3b325cb6ea`. O estado pessoal e os PDFs não são publicados neste fork. Níveis históricos A/B/C/D não são importados nem atualizados automaticamente.
 
-O parser cobre racionais exatos, decimais finitos de até seis casas, radicais reais, coordenadas e equações lineares em x/y. Há limites de tamanho, inteiros seguros e complexidade. Não executa código, não usa CAS externo e não aprova arredondamentos como igualdade exata. Produtos não lineares, denominadores com variáveis e funções gerais pedem esclarecimento. Formas gerais, reduzidas e ponto-inclinação e múltiplos não nulos representam a mesma reta. Provas são contratos de relações específicas com caminhos equivalentes; a reflexão em português orienta o tutor, mas não é certificada como prova matemática.
+O parser cobre racionais exatos, decimais finitos de até seis casas, radicais reais, coordenadas e equações lineares em x/y. Há limites de tamanho, inteiros seguros e complexidade. Não executa código, não usa CAS externo e não aprova arredondamentos como igualdade exata. Produtos não lineares, denominadores com variáveis e funções gerais pedem esclarecimento. Formas gerais, reduzidas, ponto-inclinação e múltiplos não nulos representam a mesma reta. Provas têm contratos de relações específicas com caminhos equivalentes; a reflexão em português orienta o tutor, mas não é certificada como prova matemática.
 
-Somente entradas validadas/corrigidas viram premissas. Hidratação revalida a matemática persistida; revisão invalida dependentes. Resultados corretos sem evidência ficam calculados. Ambiguidade não registra erro. A primeira divergência e passos anteriores sobrevivem à correção e recarga. Falha de localStorage mantém a sessão em memória e avisa o usuário; limpar remove somente a chave deste app.
+Somente entradas validadas/corrigidas viram premissas. Hidratação revalida a matemática persistida; revisão invalida dependentes. A primeira divergência e passos anteriores sobrevivem à correção e recarga. Falha de localStorage mantém a sessão em memória e avisa o usuário; limpar remove somente a chave `geometria-dojo-v1`.
 
 ## GeoGebra e privacidade
 
-Embedding oficial `deployggb.js`/`GGBApplet`, carregado por ação do aluno. O GeoGebra exige origem normal para seus frames GWT; por isso executa em uma prévia visual diferente da origem de estudo. Mesmo com `allow-same-origin` nesse frame isolado, a política de mesma origem impede acesso à página principal e seu localStorage. URLs carregam apenas IDs de atividade/etapa em fragmento, nunca respostas; o frame recebe documentos estáticos preparados no build. `postMessage` aceita somente status, conferindo origem e janela. A CSP principal permite conexões somente à própria origem; não existem endpoints de submissão, IA, sincronização, Sentry ou analytics no perfil.
+Embedding oficial `deployggb.js`/`GGBApplet`, carregado por ação do aluno na própria área da figura. Até ficar pronto, o SVG continua visível; falha de rede ou timeout mantém diagrama e resolução. Há zoom, reinicialização e retorno ao visual estático. A exploração da atividade derivada permite arrastar A/B/C e recalcula projeções e ângulos retos nativos. Alterar essa exploração não altera os dados do enunciado nem o ledger. Os treinos originais mantêm seus pontos dados fixos.
 
-GeoGebra recebe requisições normais de recursos e pode observar metadados de rede, mas não respostas ou ledger. Construções ocultam camadas até a validação e não mostram medidas finais. SVG descritivo e tutor permanecem se o applet falhar. Pontos dados são fixos; exploração permite zoom/pan, sem transformar a figura em autoridade matemática.
+O GeoGebra exige origem normal para seus frames GWT; por isso executa em uma prévia visual diferente da origem de estudo. Mesmo com `allow-same-origin` no frame isolado, a política de mesma origem impede acesso à página principal e seu localStorage. URLs carregam somente IDs de atividade/etapa em fragmento, nunca respostas; os documentos são preparados a partir de dados autorais no build. `postMessage` aceita somente status, conferindo origem e janela. A CSP principal permite conexões somente à própria origem; não existem endpoints de submissão, IA, sincronização, Sentry ou analytics no perfil.
 
-## Aceitação e validação
+GeoGebra recebe requisições normais de recursos e pode observar metadados de rede, sem receber respostas ou ledger. A exploração não certifica a matemática. Construções são liberadas por estágios validados; H aparece somente depois da prova da interseção. Escala isotrópica e redimensionamento do applet foram conferidos em Chromium desktop e mobile, inclusive depois de reduzir a janela.
 
-54 testes cobrem equivalência racional/radical e escalamento, sintaxe limitada, os sete treinos, erro local, ambiguidade, evidência pendente, dependências, hidratação adulterada, diagnóstico corrigido, limpeza/quota, falha do applet e isolamento. `geometry:check` executa TypeScript estrito e ESLint; `geometry:build` exporta o perfil Next.js.
+## Aceitação, evidências e licença
 
-AC-01 a AC-06 e AC-09/10/12 possuem testes determinísticos. AC-07/08 usam construções de pontos, segmentos, retas/interseção, alternativas e teste de falha; o carregamento real é conferido no navegador. AC-11 é conferido em viewport 390×844, teclado, foco, conclusão, recarga e limpeza. Esta prévia cobre sete treinos, não a verificação completa dos 79 exercícios.
+A suíte inclui os 54 testes anteriores e regressões de cena, pedagogia, alturas, reset, estado persistido e GeoGebra. [GEOMETRY_VERIFICATION.md](GEOMETRY_VERIFICATION.md) registra contagens, jornadas, gates, evidências e limites reais. `geometry:check` executa TypeScript estrito e ESLint; `geometry:build` exporta o perfil Next.js e registra o SHA em `deployment-info.json`. O teste de navegador lê esse manifesto e informa qual build verificou.
 
-## Licença e referências
-
-Avisos e licença upstream preservados. A interface oferece a licença e código correspondente ao SHA do build, que precisa estar publicado no fork antes do deploy. Nenhum merge, alteração de acesso, domínio ou publicação de produção faz parte do fluxo.
+Avisos e licença upstream preservados. A interface oferece a licença e código correspondente ao SHA do build, que precisa estar publicado no fork antes do deploy. Nenhum merge, alteração de acesso, domínio ou publicação de produção faz parte deste fluxo.
 
 - [GeoGebra embedding](https://geogebra.github.io/docs/reference/en/GeoGebra_Apps_Embedding/)
 - [GeoGebra Apps API](https://geogebra.github.io/docs/reference/en/GeoGebra_Apps_API/)

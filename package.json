@@ -5,6 +5,7 @@
   "scripts": {
     "geometry:dev": "next dev geometry -p 3100",
     "geometry:build": "tsx scripts/build-geometry.ts",
+    "geometry:browser": "node scripts/geometry-browser.mjs",
     "geometry:test": "vitest run --config geometry/vitest.config.ts",
     "geometry:check": "tsc --noEmit -p geometry/tsconfig.json && eslint features/Geometry geometry/app scripts/build-geometry.ts",
     "prepare": "husky",

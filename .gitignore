@@ -83,3 +83,5 @@ next-env.d.ts
 /geometry/visual-out/
 /geometry/public/geogebra.html
 /geometry/public/LICENSE.txt
+
+/geometry/browser-evidence/
