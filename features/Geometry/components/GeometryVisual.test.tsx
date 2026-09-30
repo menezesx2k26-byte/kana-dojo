@@ -112,3 +112,41 @@ describe('visual fallback, gating and isolation', () => {
     expect(document.querySelector('iframe')?.src).not.toContain('PRIVATE');
   });
 });
+it('uses the same study canvas for a ready applet and restores the diagram while a new stage loads', () => {
+  const v = activities['lista-2-q01'].visual;
+  const view = render(
+    <GeometryVisual id='lista-2-q01' visual={v} validated={{}} />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Explorar no GeoGebra' }));
+  const frame = document.querySelector('iframe')!;
+  act(() =>
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        source: frame.contentWindow,
+        origin: 'http://127.0.0.1:3101',
+        data: { kind: 'geometry-ggb', status: 'ready' },
+      }),
+    ),
+  );
+  expect(screen.queryByRole('img')).toBeNull();
+  view.rerender(
+    <GeometryVisual
+      id='lista-2-q01'
+      visual={v}
+      validated={{ medio: 'PRIVATE-ANSWER' }}
+    />,
+  );
+  expect(screen.getByRole('img')).toBeTruthy();
+  expect(screen.getByRole('status').textContent).toMatch(/Carregando/);
+});
+it('exports the validated semantic altitude and its right-angle marker without a premature H', () => {
+  const visual = visibleVisual(activities['altura-ortocentro'].visual, {
+    'altura-c': 'private value',
+  });
+  const doc = geogebraDocument(visual);
+  expect(doc).toContain('construction0=Segment');
+  expect(doc).toContain('right0');
+  expect(doc).toContain('Angle(baseAB,altC)');
+  expect(doc).not.toContain('H=(9,6)');
+  expect(doc).not.toContain('private value');
+});

@@ -66,6 +66,7 @@ export interface PlotPoint {
 }
 export interface Visual {
   type: 'points' | 'segment' | 'line' | 'intersection' | 'distance' | 'area';
+  exploration?: 'triangle-altitudes';
   description: string;
   points: PlotPoint[];
   lines?: { equation: string; after?: string }[];

@@ -17,18 +17,27 @@ export function GeometryVisual({
 }) {
   const [enabled, setEnabled] = useState(false),
     [revision, setRevision] = useState(0);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>(
-    'loading',
-  );
+  const [appletState, setAppletState] = useState<{
+    document?: string;
+    status: 'loading' | 'ready' | 'failed';
+  }>({ status: 'loading' });
   const frame = useRef<HTMLIFrameElement>(null);
   const visible = visibleVisual(visual, validated);
   const document = isolatedVisualURL(
     typeof window === 'undefined' ? '' : window.location.origin,
     `${id}:${Object.keys(validated).sort().join(',')}`,
   );
+  const status = !document
+    ? 'failed'
+    : appletState.document === document
+      ? appletState.status
+      : 'loading';
   useEffect(() => {
     if (!enabled) return;
-    const timer = setTimeout(() => setStatus('failed'), 20000);
+    const timer = setTimeout(
+      () => setAppletState({ document, status: 'failed' }),
+      20000,
+    );
     function receive(event: MessageEvent) {
       if (
         event.source !== frame.current?.contentWindow ||
@@ -38,7 +47,7 @@ export function GeometryVisual({
         return;
       if (event.data.status === 'ready' || event.data.status === 'failed') {
         clearTimeout(timer);
-        setStatus(event.data.status);
+        setAppletState({ document, status: event.data.status });
       }
     }
     window.addEventListener('message', receive);
@@ -52,18 +61,41 @@ export function GeometryVisual({
       <div className='panel-heading'>
         <div>
           <span className='eyebrow'>ENXERGAR A RELAÇÃO</span>
-          <h2 id='visual-heading'>Do símbolo ao plano</h2>
+          <h2 id='visual-heading'>A relação no plano</h2>
         </div>
         <span className='tiny-badge'>GeoGebra</span>
       </div>
-      <GeometryScene visual={visible} />
-      <p className='visual-description'>{visual.description}</p>
+      <div
+        className={`visual-canvas ${enabled && status === 'ready' ? 'ggb-ready' : ''}`}
+      >
+        {enabled && status === 'ready' ? null : (
+          <GeometryScene visual={visible} />
+        )}
+        {enabled && document ? (
+          <iframe
+            key={`${document}-${revision}`}
+            ref={frame}
+            title='Construção GeoGebra isolada'
+            sandbox='allow-scripts allow-same-origin'
+            referrerPolicy='no-referrer'
+            src={document}
+            className={
+              status === 'ready' ? 'ggb-frame' : 'ggb-frame ggb-pending'
+            }
+          />
+        ) : null}
+      </div>
+      <p className='visual-description'>
+        {visual.exploration
+          ? 'Arraste A, B e C para observar como as alturas acompanham o triângulo. Esta exploração não altera os dados do treino ou seu ledger. Reiniciar volta às coordenadas originais.'
+          : visual.description}
+      </p>
       <div className='visual-actions'>
         <Button
           type='button'
           variant='outline'
           onClick={() => {
-            setStatus('loading');
+            setAppletState({ document, status: 'loading' });
             setEnabled(true);
             setRevision(n => n + 1);
           }}
@@ -89,19 +121,6 @@ export function GeometryVisual({
                 ? 'Construção interativa pronta. A figura apoia a conta; a validação segue pelo ledger.'
                 : 'GeoGebra indisponível. O diagrama e a resolução continuam funcionando.'}
           </p>
-          {document && (
-            <iframe
-              key={`${document}-${revision}`}
-              ref={frame}
-              title='Construção GeoGebra isolada'
-              sandbox='allow-scripts allow-same-origin'
-              referrerPolicy='no-referrer'
-              src={document}
-              className={
-                status === 'failed' ? 'ggb-frame hidden-frame' : 'ggb-frame'
-              }
-            />
-          )}
         </>
       )}
       <p className='privacy-note'>

@@ -1,3 +1,4 @@
+import { frameFor } from './scene';
 import type { Visual } from '../data/activities';
 export function visibleVisual(
   visual: Visual,
@@ -28,19 +29,101 @@ export function visibleVisual(
 }
 /** Only authored construction data enters this document, never user input or storage. */
 export function geogebraDocument(visual: Visual): string {
+  const points = [
+    ...visual.points,
+    ...(visual.constructions ?? []).flatMap(c =>
+      c.infinite ? [c.from] : [c.from, c.to],
+    ),
+  ];
+  const frame = frameFor(points);
+  const coord = (p: { x: number; y: number }) => `(${p.x},${p.y})`;
   const commands = [
-    ...visual.points.map(p => `${p.name}=(${p.x},${p.y})`),
+    ...visual.points.map(p => `${p.name}=${coord(p)}`),
     ...(visual.segments ?? []).map(([a, b], i) => `seg${i}=Segment(${a},${b})`),
     ...(visual.lines ?? []).map((l, i) => `line${i}:${l.equation}`),
+    ...(visual.constructions ?? []).map(
+      (c, i) =>
+        `construction${i}=${c.infinite ? 'Line' : 'Segment'}(${coord(c.from)},${coord(c.to)})`,
+    ),
+    ...(visual.extensions ?? []).map(
+      (c, i) => `extension${i}=Line(${coord(c.from)},${coord(c.to)})`,
+    ),
   ];
+  for (const [i, m] of (visual.rightAngles ?? []).entries()) {
+    const unit = 22 / frame.scale;
+    const a = Math.hypot(m.along.x, m.along.y),
+      b = Math.hypot(m.toward.x, m.toward.y);
+    const u = { x: (m.along.x / a) * unit, y: (m.along.y / a) * unit },
+      v = { x: (m.toward.x / b) * unit, y: (m.toward.y / b) * unit };
+    const p = { x: m.at.x + u.x, y: m.at.y + u.y },
+      q = { x: p.x + v.x, y: p.y + v.y },
+      r = { x: m.at.x + v.x, y: m.at.y + v.y };
+    commands.push(
+      `right${i}a=Segment(${coord(p)},${coord(q)})`,
+      `right${i}b=Segment(${coord(q)},${coord(r)})`,
+      `right${i}label=Text("90°",${coord({ x: m.at.x + 28 / frame.scale, y: m.at.y - 30 / frame.scale })})`,
+    );
+  }
+  for (const [i, m] of (visual.equalMarks ?? []).entries()) {
+    const dx = m.b.x - m.a.x,
+      dy = m.b.y - m.a.y,
+      len = Math.hypot(dx, dy),
+      size = 8 / frame.scale;
+    const mid = { x: (m.a.x + m.b.x) / 2, y: (m.a.y + m.b.y) / 2 };
+    commands.push(
+      `tick${i}=Segment(${coord({ x: mid.x - (dy / len) * size, y: mid.y + (dx / len) * size })},${coord({ x: mid.x + (dy / len) * size, y: mid.y - (dx / len) * size })})`,
+    );
+  }
   const names = visual.points.map(p => p.name);
-  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><style>html,body{margin:0;background:#faf9f4}#ggb{width:100%;height:360px;overflow:hidden}</style></head><body><div id="ggb"></div><script src="https://www.geogebra.org/apps/deployggb.js" onerror="parent.postMessage({kind:'geometry-ggb',status:'failed'},'*')"></script><script>
-  try { const applet = new GGBApplet({appName:'classic',width:600,height:360,language:'pt',showToolBar:false,showAlgebraInput:false,showMenuBar:false,showResetIcon:false,showZoomButtons:true,enableRightClick:false,allowStyleBar:false,showSuggestionButtons:false,preventFocus:true,appletOnLoad(api){
-    api.setPerspective('G'); api.setAxesVisible(true,true); api.setGridVisible(true); api.setCoordSystem(-9,13,-8,10);
-    for(const command of ${JSON.stringify(commands)}){if(!api.evalCommand(command))throw new Error('construction');}
-    for(const name of ${JSON.stringify(names)}){api.setLabelVisible(name,true);api.setLabelStyle(name,0);api.setPointSize(name,5);api.setColor(name,52,104,78);}
-    ${JSON.stringify(commands.map((_c, i) => i))}.forEach(i=>{ const name=i<${names.length}?${JSON.stringify(names)}[i]:'';if(name)api.setFixed(name,true,false); });
-    parent.postMessage({kind:'geometry-ggb',status:'ready'},'*');
+  const dynamic = visual.exploration === 'triangle-altitudes';
+  const hidden: string[] = [];
+  if (dynamic) {
+    commands.splice(
+      0,
+      commands.length,
+      ...visual.points
+        .filter(p => p.name !== 'H')
+        .map(p => `${p.name}=${coord(p)}`),
+      ...(visual.segments ?? []).map(
+        ([a, b], i) => `seg${i}=Segment(${a},${b})`,
+      ),
+    );
+    commands.push('baseAB=Line(A,B)', 'baseBC=Line(B,C)');
+    hidden.push('baseAB', 'baseBC');
+    const vertices = ['C', 'A'];
+    for (const [i] of (visual.constructions ?? []).entries()) {
+      const v = vertices[i],
+        base = v === 'C' ? 'baseAB' : 'baseBC';
+      commands.push(
+        `alt${v}=PerpendicularLine(${v},${base})`,
+        `foot${v}=Intersect(alt${v},${base})`,
+        `construction${i}=Segment(${v},foot${v})`,
+        `right${i}=Angle(${base},alt${v})`,
+      );
+      hidden.push(`alt${v}`, `foot${v}`);
+    }
+    if (visual.extensions?.length) commands.push('extension0=Line(B,C)');
+    if (visual.lines?.length)
+      commands.push(
+        'line0=PerpendicularLine(C,baseAB)',
+        'line1=PerpendicularLine(A,baseBC)',
+        'H=Intersect(line0,line1)',
+      );
+  }
+  const objects = commands.map(c => c.split(/[=:]/)[0]);
+  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><style>html,body{margin:0;background:#fffdf8;overflow:hidden}#ggb{width:100vw;height:100vh;overflow:hidden}</style></head><body><div id="ggb"></div><script src="https://www.geogebra.org/apps/deployggb.js" onerror="parent.postMessage({kind:'geometry-ggb',status:'failed'},'*')"></script><script>
+  try { const applet = new GGBApplet({appName:'classic',width:window.innerWidth,height:window.innerHeight,language:'pt',showToolBar:false,showAlgebraInput:false,showMenuBar:false,showResetIcon:false,showZoomButtons:true,enableRightClick:false,allowStyleBar:false,showSuggestionButtons:false,preventFocus:true,disableAutoScale:true,appletOnLoad(api){
+    try {
+      api.setPerspective('G'); api.setAxesVisible(false,false); api.setGridVisible(false);
+      for(const command of ${JSON.stringify(commands)}){if(!api.evalCommand(command))throw new Error('construction');}
+      for(const name of ${JSON.stringify(objects)}){api.setLabelVisible(name,false);api.setFixed(name,true,false);api.setLineThickness(name,4);api.setColor(name,34,79,145);if(/construction|right|tick/.test(name))api.setColor(name,184,91,28);if(/extension/.test(name))api.setLineStyle(name,1);if(/right/.test(name))api.setLabelStyle(name,2);}
+      for(const name of ${JSON.stringify(hidden)})api.setVisible(name,false);
+      for(const name of ${JSON.stringify(dynamic ? objects.filter(n => /^right/.test(n)) : [])})api.setLabelVisible(name,true);
+      for(const name of ${JSON.stringify(names)}){api.setLabelVisible(name,true);api.setLabelStyle(name,0);api.setPointSize(name,5);api.setColor(name,32,45,64);if(${dynamic}&&name!=='H')api.setFixed(name,false,true);}
+      const resize=()=>{const width=window.innerWidth,height=window.innerHeight;api.setSize(width,height);const cx=${(frame.minX + frame.maxX) / 2},cy=${(frame.minY + frame.maxY) / 2},spanY=${frame.maxY - frame.minY};const spanX=spanY*width/height;api.setCoordSystem(cx-spanX/2,cx+spanX/2,cy-spanY/2,cy+spanY/2);};
+      resize();window.addEventListener('resize',resize);
+      parent.postMessage({kind:'geometry-ggb',status:'ready'},'*');
+    }catch{parent.postMessage({kind:'geometry-ggb',status:'failed'},'*');}
   }},true); applet.inject('ggb'); }catch{parent.postMessage({kind:'geometry-ggb',status:'failed'},'*');}
   </script></body></html>`;
 }

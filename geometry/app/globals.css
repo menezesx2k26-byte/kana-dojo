@@ -1066,3 +1066,23 @@ textarea {
     font-size: 1.35rem;
   }
 }
+.visual-canvas {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.visual-canvas.ggb-ready {
+  aspect-ratio: 3/2;
+  min-height: 300px;
+}
+.visual-canvas .ggb-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.visual-canvas .ggb-pending {
+  visibility: hidden;
+  pointer-events: none;
+}

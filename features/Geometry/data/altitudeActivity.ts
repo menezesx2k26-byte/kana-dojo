@@ -114,6 +114,7 @@ export const altitudeActivity: Activity = {
   ],
   visual: {
     type: 'intersection',
+    exploration: 'triangle-altitudes',
     description:
       'Triângulo ABC. As alturas são construídas progressivamente. Seus trechos finitos evitam revelar a interseção antes do cálculo. H e as retas completas aparecem somente após validação do ortocentro.',
     points: [
