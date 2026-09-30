@@ -25,3 +25,39 @@ it('continues in memory and informs the UI when browser persistence fails', asyn
   expect(useGeometryStore.getState().selected).toBe('lista-2-q04');
   expect(useGeometryStore.getState().durable).toBe(false);
 });
+it.each(['__proto__', 'constructor', 'toString'])(
+  'rejects inherited activity ID %s on hydration while retaining valid sessions',
+  async selected => {
+    useGeometryStore.setState({ selected: 'lista-2-q04', sessions: {} });
+    const valid = {
+      tool: 'Perpendicularidade + inclinações',
+      rationale: 'A altura passa pelo vértice e forma ângulo reto.',
+      entries: [],
+      hints: {},
+    };
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        state: {
+          selected,
+          theme: 'light',
+          sessions: Object.fromEntries([
+            ['altura-ortocentro', valid],
+            ['__proto__', valid],
+            ['constructor', valid],
+            ['toString', valid],
+          ]),
+        },
+      }),
+    );
+    await hydrateGeometry();
+    expect(useGeometryStore.getState().selected).toBe('altura-ortocentro');
+    expect(Object.keys(useGeometryStore.getState().sessions)).toEqual([
+      'altura-ortocentro',
+    ]);
+    expect(useGeometryStore.getState().sessions['altura-ortocentro'].tool).toBe(
+      valid.tool,
+    );
+  },
+);

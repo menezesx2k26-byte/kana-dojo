@@ -37,8 +37,10 @@ function lesson(activity: Activity, step: Step) {
       right: 'Perpendicular · 90°',
       wrong: 'Passar pelo ponto médio',
       meaning:
-        'Um ângulo reto vira produto escalar zero ou, quando ambas existem, produto das inclinações −1.',
-      concept: 'altitude' as const,
+        activity.id === 'lista-2-q15'
+          ? 'A reta pedida passa por P e é perpendicular à reta r. O ponto médio não define essa reta. Os 90° viram produto escalar zero ou, quando ambas existem, produto das inclinações −1.'
+          : 'O caminho mais curto de P até a reta r é perpendicular a r. O ponto médio não define esse caminho. Usamos a projeção perpendicular ou a fórmula da distância ponto-reta.',
+      concept: 'perpendicular' as const,
     };
   if (step.kind === 'membership')
     return {
@@ -118,11 +120,8 @@ export function RelationTutor({
               type='button'
               onClick={() => {
                 const feedback =
-                  l.concept === 'bisector' || l.concept === 'altitude'
-                    ? conceptFeedback(
-                        l.concept,
-                        l.concept === 'bisector' ? 'vertex' : 'midpoint',
-                      )
+                  l.concept === 'bisector'
+                    ? conceptFeedback('bisector', 'vertex')
                     : { message: l.meaning, compare: false };
                 setMessage(feedback.message);
                 setCompare(feedback.compare);

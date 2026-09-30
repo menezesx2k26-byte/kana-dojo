@@ -589,8 +589,10 @@ const all: Activity[] = [
   },
 ];
 
-export const activities: Record<string, Activity> = Object.fromEntries(
-  [...all, altitudeActivity].map(a => [a.id, a]),
+// Persisted IDs are untrusted: inherited Object keys must never be activities.
+export const activities: Record<string, Activity> = Object.assign(
+  Object.create(null),
+  Object.fromEntries([...all, altitudeActivity].map(a => [a.id, a])),
 );
 const editorial: Record<string, string> = {
   'lista-2-q01':
