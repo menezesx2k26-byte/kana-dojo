@@ -513,7 +513,10 @@ try {
       panel,
     );
     if (!blocked) {
-      const frame = p.frames().find(f => f.url().includes('geogebra.html'));
+      const frame = await p
+        .getByTitle('Construção GeoGebra isolada', { exact: true })
+        .elementHandle()
+        .then(element => element?.contentFrame());
       assert(frame);
       const ledger = await p.locator('.ledger-list').innerText();
       const dynamic = await frame.evaluate(() => {
@@ -569,9 +572,11 @@ try {
         .getByRole('status')
         .filter({ hasText: /pronta/ })
         .waitFor({ timeout: 45000 });
-      const resetFrame = p
-        .frames()
-        .find(f => f.url().includes('geogebra.html'));
+      const resetFrame = await p
+        .getByTitle('Construção GeoGebra isolada', { exact: true })
+        .elementHandle()
+        .then(element => element?.contentFrame());
+      assert(resetFrame);
       assert.equal(
         await resetFrame.evaluate(() => window.ggbApplet.getXcoord('C')),
         1,
