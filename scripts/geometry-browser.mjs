@@ -126,11 +126,12 @@ async function noH(page) {
 }
 try {
   const manifestPage = await browser.newPage();
-  report.sourceSha = (
-    await (
-      await manifestPage.request.get(`${baseURL}/deployment-info.json`)
-    ).json()
-  ).sourceSha;
+  await manifestPage.goto(baseURL);
+  report.sourceSha = await manifestPage.evaluate(async () => {
+    const response = await fetch('/deployment-info.json');
+    if (!response.ok) throw new Error(`Manifest HTTP ${response.status}`);
+    return (await response.json()).sourceSha;
+  });
   await manifestPage.close();
   for (const [name, width, height] of [
     ['desktop', 1440, 1000],

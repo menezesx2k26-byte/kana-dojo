@@ -73,8 +73,14 @@ Revisor com contexto novo, gpt-6-astra, sobre todos os gates de produto: nenhuma
 
 O transporte Git HTTPS retornou falha de autenticação, inclusive com o helper da conexão. A API GitHub confirmou permissão de escrita e aceitou os blobs autorizados. A entrega pela API Git reconstrói blobs, árvores e commits locais com autores/datas preservados, exige igualdade de cada SHA, e move exclusivamente `feat/geometria-analitica-dojo` com `force=false`. O histórico por gate permanece íntegro. O relatório final e os manifestos informam o SHA entregue; main não participa dessa atualização.
 
-## Prévia Cloudflare
+## Prévia Cloudflare — estado do takeover original
 
 Bloqueio de deploy: este ambiente conectado possui rede, mas nenhum secret, variável de runtime ou identidade de saída configurados para Cloudflare; não há conexão Cloudflare callable, token ou sessão CLI exposta. Consulta de segredos de GitHub Actions no repo retornou 403 para a integração. Repositórios de infraestrutura referidos no handoff foram inspecionados para configuração relevante; projetos de outros produtos não foram alterados.
 
 Projeto dedicado referido pelo handoff: `geometria-analitica-dojo`. Sua existência e estado atuais não puderam ser consultados na conta. URL de prévia e SHA implantado: **indisponíveis; nenhum deploy foi realizado nesta execução**. Código, export e testes foram concluídos independentemente desse acesso. Não foi criado projeto duplicado nem hospedagem alternativa; main, produção e DNS permanecem sem alterações.
+
+## Publicação posterior pelo Site Ops
+
+A busca ampliada nos repositórios encontrou o runner `menezes-platform/ops-site-ops`, que usa os secrets existentes da Cloudflare somente no GitHub Actions. A configuração foi preparada na branch `feat/geometria-dojo-preview`, sem alterar main. O alvo oferece apenas o ambiente `preview` e exige o SHA revisado do produto. A proteção consulta o projeto e inventaria todos os projetos antes de criar um dedicado quando ausente; rejeita uma branch de produção, outro repositório ou uma integração Git nativa já responsável pelo deploy.
+
+A Cloudflare atribuiu ao projeto `geometria-analitica-dojo` o subdomínio `geometria-analitica-dojo-cmk.pages.dev`. A aplicação usa a prévia `feat-geometria-analitica-doj.geometria-analitica-dojo-cmk.pages.dev`; o visual usa a branch curta `geometry-visual` no mesmo projeto e fica em outra origem. A allowlist e os `frame-ancestors` reconhecem esse host dedicado, mantendo a rejeição de projetos alheios e da origem que guarda respostas. O manifesto é lido pelo navegador real durante o ensaio, usando sua mesma configuração de rede. Quatro regressões adicionais de origem elevam a suíte do produto a **87 testes em 11 arquivos**. Os manifestos e o relatório de navegador registram o SHA realmente servido.

@@ -6,7 +6,7 @@ export function isolatedVisualURL(
   stage: string,
 ): string | undefined {
   const allowed =
-    /^(http:\/\/127\.0\.0\.1:3101|https:\/\/[a-z0-9-]+\.geometria-analitica-dojo\.pages\.dev)$/;
+    /^(http:\/\/127\.0\.0\.1:3101|https:\/\/[a-z0-9-]+\.geometria-analitica-dojo(?:-cmk)?\.pages\.dev)$/;
   if (!allowed.test(visualOrigin) || visualOrigin === parentOrigin)
     return undefined;
   return `${visualOrigin}/geogebra.html#${stage}`;
