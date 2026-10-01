@@ -76,14 +76,22 @@ export function GeometryDojo() {
         </nav>
         <Button
           type='button'
-          variant='ghost'
-          size='icon'
+          variant='outline'
+          className='theme-toggle'
           aria-label={
             store.theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'
           }
           onClick={store.toggleTheme}
         >
-          {store.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          {store.theme === 'dark' ? (
+            <>
+              <Sun size={18} aria-hidden='true' /> Claro
+            </>
+          ) : (
+            <>
+              <Moon size={18} aria-hidden='true' /> Escuro
+            </>
+          )}
         </Button>
       </header>
       <div className='context-strip'>

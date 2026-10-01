@@ -50,6 +50,12 @@ O applet oficial realmente carregou: API disponível, sem falhas de página/rede
 
 O ensaio de indisponibilidade aborta deliberadamente o recurso oficial. Essa única falha de rede e seu console `ERR_FAILED` são esperados; não houve erro de página. O diagrama, o ledger e a resolução continuam disponíveis. A revisão do estado do applet impede que o status ready de uma etapa anterior esconda o fallback enquanto uma nova construção carrega.
 
+## Tema escolhido após os previews
+
+O usuário escolheu a segunda das três prévias, violeta + lima, e pediu um botão para alternar para o modo claro. Novas sessões começam no tema escuro; preferências claras/escuras já salvas continuam válidas. O cabeçalho oferece um botão com ícone e texto “Claro”/“Escuro”, inclusive em 390×844. A variante clara usa branco/lilás e verde mais escuro nos traços e rótulos geométricos. Os campos mantêm contraste de borda ≥3:1; o texto das construções claras tem contraste de aproximadamente 4,98:1 sobre branco. A exploração GeoGebra também usa violeta/verde.
+
+Antes da mudança, o novo ensaio de navegador falhou na exigência de tema escuro inicial. Depois da implementação, a suíte continuou em **83/83**, TypeScript/ESLint e o export de produção passaram. As 12 jornadas e os dois ensaios GeoGebra passaram nos dois viewports, com 32 capturas em `/workspace/geometry-theme-final`. Os novos checks verificam o texto visível do botão, o `color-scheme` efetivo, recarga nos dois temas e a preservação do ledger validado ao trocar de tema. As capturas iniciais claras/escuras e de construção/conclusão foram inspecionadas; nenhum overflow ou colisão de rótulos foi detectado. O `sourceSha` do manifesto/relatório identifica o commit final testado.
+
 ## Decisões e limites
 
 - O triângulo solicitado está ausente das duas listas originais: foi adicionado como estudo **Derivado**, fora dos 79 IDs. Custo se a classificação estiver errada: corrigir a referência, sem renumerar questões.

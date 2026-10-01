@@ -137,6 +137,26 @@ try {
     ['mobile', 390, 844],
   ]) {
     const { page: p, audit } = await open(width, height);
+    assert.equal(
+      await p
+        .getByRole('button', { name: 'Usar tema claro', exact: true })
+        .count(),
+      1,
+      'new sessions start in the selected violet/lime dark theme',
+    );
+    assert.match(
+      await p
+        .getByRole('button', { name: 'Usar tema claro', exact: true })
+        .innerText(),
+      /Claro/,
+      'visible theme label',
+    );
+    assert.equal(
+      await p
+        .locator('.dojo-shell')
+        .evaluate(e => getComputedStyle(e).colorScheme),
+      'dark',
+    );
     const canvas = p.locator('.altitude-study>.canvas-column');
     assert.equal(
       await p
@@ -153,11 +173,38 @@ try {
         b = await p.locator('.reference-column').boundingBox();
       assert(a.y + a.height <= b.y + 1, 'canvas overlaps ledger');
     };
+    await capture(p, `initial-dark-${name}`);
+    await p
+      .getByRole('button', { name: 'Usar tema claro', exact: true })
+      .click();
+    await p.reload();
+    await p.getByRole('heading', { name: 'O encontro das alturas' }).waitFor();
+    assert.equal(
+      await p
+        .locator('.dojo-shell')
+        .evaluate(e => getComputedStyle(e).colorScheme),
+      'light',
+      'light theme survives reload',
+    );
+    assert.match(
+      await p
+        .getByRole('button', { name: 'Usar tema escuro', exact: true })
+        .innerText(),
+      /Escuro/,
+    );
     await capture(p, `initial-light-${name}`);
     await p
       .getByRole('button', { name: 'Usar tema escuro', exact: true })
       .click();
-    await capture(p, `initial-dark-${name}`);
+    await p.reload();
+    await p.getByRole('heading', { name: 'O encontro das alturas' }).waitFor();
+    assert.equal(
+      await p
+        .locator('.dojo-shell')
+        .evaluate(e => getComputedStyle(e).colorScheme),
+      'dark',
+      'dark theme survives reload',
+    );
     await p
       .getByRole('button', { name: 'Usar tema claro', exact: true })
       .click();
@@ -240,6 +287,20 @@ try {
       () => document.activeElement?.id === 'concept-tutor',
     );
     await stage('first-height');
+    const firstHeight = await p.locator('.ledger-list').innerText();
+    await p
+      .getByRole('button', { name: 'Usar tema escuro', exact: true })
+      .click();
+    await p.reload();
+    await p.getByRole('heading', { name: 'O encontro das alturas' }).waitFor();
+    assert.equal(
+      await p.locator('.ledger-list').innerText(),
+      firstHeight,
+      'theme switch preserves validated ledger',
+    );
+    await p
+      .getByRole('button', { name: 'Usar tema claro', exact: true })
+      .click();
     await p.getByRole('button', { name: '↺ RESET', exact: true }).click();
     assert.match(await p.locator('.ledger-list').innerText(), /y-2=/);
     await p

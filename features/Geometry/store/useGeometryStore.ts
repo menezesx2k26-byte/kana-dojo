@@ -77,7 +77,7 @@ export const useGeometryStore = create<GeometryState>()(
     set => ({
       sessions: {},
       selected: 'altura-ortocentro',
-      theme: 'light',
+      theme: 'dark',
       hydrated: false,
       durable: true,
       select: selected => set({ selected }),
@@ -186,7 +186,7 @@ export const useGeometryStore = create<GeometryState>()(
               catalog.some(q => q.id === saved.selected))
               ? saved.selected
               : 'altura-ortocentro',
-          theme: saved.theme === 'dark' ? 'dark' : 'light',
+          theme: saved.theme === 'light' ? 'light' : 'dark',
         };
       },
     },

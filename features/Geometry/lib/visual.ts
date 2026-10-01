@@ -111,15 +111,15 @@ export function geogebraDocument(visual: Visual): string {
       );
   }
   const objects = commands.map(c => c.split(/[=:]/)[0]);
-  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><style>html,body{margin:0;background:#fffdf8;overflow:hidden}#ggb{width:100vw;height:100vh;overflow:hidden}</style></head><body><div id="ggb"></div><script src="https://www.geogebra.org/apps/deployggb.js" onerror="parent.postMessage({kind:'geometry-ggb',status:'failed'},'*')"></script><script>
+  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><style>html,body{margin:0;background:#f7f6fd;overflow:hidden}#ggb{width:100vw;height:100vh;overflow:hidden}</style></head><body><div id="ggb"></div><script src="https://www.geogebra.org/apps/deployggb.js" onerror="parent.postMessage({kind:'geometry-ggb',status:'failed'},'*')"></script><script>
   try { const applet = new GGBApplet({appName:'classic',width:window.innerWidth,height:window.innerHeight,language:'pt',showToolBar:false,showAlgebraInput:false,showMenuBar:false,showResetIcon:false,showZoomButtons:true,enableRightClick:false,allowStyleBar:false,showSuggestionButtons:false,preventFocus:true,disableAutoScale:true,appletOnLoad(api){
     try {
       api.setPerspective('G'); api.setAxesVisible(false,false); api.setGridVisible(false);
       for(const command of ${JSON.stringify(commands)}){if(!api.evalCommand(command))throw new Error('construction');}
-      for(const name of ${JSON.stringify(objects)}){api.setLabelVisible(name,false);api.setFixed(name,true,false);api.setLineThickness(name,4);api.setColor(name,34,79,145);if(/construction|right|tick/.test(name))api.setColor(name,184,91,28);if(/extension/.test(name))api.setLineStyle(name,1);if(/right/.test(name))api.setLabelStyle(name,2);}
+      for(const name of ${JSON.stringify(objects)}){api.setLabelVisible(name,false);api.setFixed(name,true,false);api.setLineThickness(name,4);api.setColor(name,111,66,202);if(/construction|right|tick/.test(name))api.setColor(name,89,122,16);if(/extension/.test(name))api.setLineStyle(name,1);if(/right/.test(name))api.setLabelStyle(name,2);}
       for(const name of ${JSON.stringify(hidden)})api.setVisible(name,false);
       for(const name of ${JSON.stringify(dynamic ? objects.filter(n => /^right/.test(n)) : [])})api.setLabelVisible(name,true);
-      for(const name of ${JSON.stringify(names)}){api.setLabelVisible(name,true);api.setLabelStyle(name,0);api.setPointSize(name,5);api.setColor(name,32,45,64);if(${dynamic}&&name!=='H')api.setFixed(name,false,true);}
+      for(const name of ${JSON.stringify(names)}){api.setLabelVisible(name,true);api.setLabelStyle(name,0);api.setPointSize(name,5);api.setColor(name,42,36,66);if(${dynamic}&&name!=='H')api.setFixed(name,false,true);}
       const resize=()=>{const width=window.innerWidth,height=window.innerHeight;api.setSize(width,height);const cx=${(frame.minX + frame.maxX) / 2},cy=${(frame.minY + frame.maxY) / 2},spanY=${frame.maxY - frame.minY};const spanX=spanY*width/height;api.setCoordSystem(cx-spanX/2,cx+spanX/2,cy-spanY/2,cy+spanY/2);};
       resize();window.addEventListener('resize',resize);
       parent.postMessage({kind:'geometry-ggb',status:'ready'},'*');

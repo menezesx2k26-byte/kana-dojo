@@ -43,17 +43,20 @@ h3 {
 }
 h1 {
   font:
-    clamp(2rem, 3.8vw, 3.3rem)/1.1 Georgia,
-    serif;
-  letter-spacing: -0.035em;
+    650 clamp(2rem, 3.8vw, 3.3rem)/1.1 Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: -0.04em;
 }
 h2 {
   font-size: 1.15rem;
 }
 h3 {
   font:
-    1.55rem/1.25 Georgia,
-    serif;
+    650 24px/1.25 Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: -0.04em;
 }
 p {
   line-height: 1.6;
@@ -68,39 +71,55 @@ summary:focus-visible {
   outline-offset: 4px;
 }
 .dojo-shell {
-  --background-color: #151e2a;
-  --card-color: #253349;
-  --border-color: #596c88;
-  --main-color: #a7c8ff;
-  --secondary-color: #789ac7;
-  --text: #edf1f8;
-  --muted: #b0bfd3;
-  --panel: #1b2636;
-  --line: #394b63;
-  --accent: #f2bf83;
-  --field: #172232;
-  --construction: #f2bf83;
-  --opposite: #a7c8ff;
-  background: var(--background-color);
+  --background-color: #18152f;
+  --card-color: #2b244a;
+  --border-color: #7b6a99;
+  --main-color: #bb9aff;
+  --secondary-color: #9380bf;
+  --text: #f3f1ff;
+  --muted: #b4abcd;
+  --panel: #201b39;
+  --line: #3b3157;
+  --accent: #dcf36c;
+  --field: #211c3b;
+  --construction: #dcf36c;
+  --opposite: #bb9aff;
+  --scene-shadow: #0b07283d;
+  --selected-bg: #3a2b63;
+  --selected-text: #f4edff;
+  --cta-bg: #dcf36c;
+  --cta-text: #212a12;
+  --header-glow: #382650;
+  --construction-glow: #dcf36c38;
+  --highlight: #dcf36c;
+  background:
+    radial-gradient(ellipse at 90% 0%, var(--header-glow) 0, transparent 42%),
+    var(--background-color);
   color: var(--text);
   min-height: 100vh;
   padding: 0 max(24px, calc((100vw - 1440px) / 2));
   color-scheme: dark;
 }
 .theme-light {
-  --background-color: #f8f5ed;
-  --card-color: #eee9dd;
-  --border-color: #9baabc;
-  --main-color: #224f91;
-  --secondary-color: #647c9f;
-  --text: #202d40;
-  --muted: #586578;
-  --panel: #fcfaf5;
-  --line: #d7d4cb;
-  --accent: #985017;
-  --field: #fffdf8;
-  --construction: #b85b1c;
-  --opposite: #224f91;
+  --background-color: #f7f6fd;
+  --card-color: #eee7ff;
+  --border-color: #9687ae;
+  --main-color: #6f42ca;
+  --secondary-color: #7e65aa;
+  --text: #2a2442;
+  --muted: #6b6082;
+  --panel: #fcfbff;
+  --line: #ddd6ef;
+  --accent: #597a10;
+  --field: #ffffff;
+  --construction: #597a10;
+  --opposite: #6f42ca;
+  --scene-shadow: #6f42ca12;
+  --selected-bg: #ece4fe;
+  --selected-text: #5730ac;
+  --header-glow: #eee7ff;
+  --construction-glow: transparent;
+  --highlight: #597a10;
   color-scheme: light;
 }
 .dojo-shell button,
@@ -109,6 +128,13 @@ summary:focus-visible {
 }
 .dojo-header > button {
   min-width: 44px;
+}
+.theme-toggle {
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  height: auto;
 }
 .concept-tutor:focus-visible {
   outline: 3px solid var(--main-color);
@@ -127,20 +153,30 @@ summary:focus-visible {
   align-items: center;
   text-decoration: none;
   font:
-    1.3rem Georgia,
-    serif;
+    700 1.3rem Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: -0.025em;
 }
 .brand-mark {
-  color: var(--main-color);
+  color: var(--highlight);
   display: grid;
   place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--card-color);
 }
 .brand-light {
   color: var(--muted);
+  font-weight: 400;
 }
 .preview-badge,
 .tiny-badge {
-  color: var(--muted);
+  color: var(--main-color);
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: var(--card-color);
   font-size: 11px;
   letter-spacing: 0.06em;
 }
@@ -182,7 +218,8 @@ summary:focus-visible {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--main-color);
+  background: var(--highlight);
+  box-shadow: 0 0 8px var(--construction-glow);
 }
 main {
   padding: 20px 0 48px;
@@ -209,6 +246,11 @@ main {
   letter-spacing: 0.12em;
   color: var(--muted);
   line-height: 1.6;
+}
+.workspace-top .eyebrow,
+.scene-heading .eyebrow,
+.concept-tutor > .eyebrow {
+  color: var(--main-color);
 }
 .study-grid {
   display: grid;
@@ -320,17 +362,13 @@ textarea,
 select {
   width: 100%;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 12px;
   background: var(--field);
   padding: 12px 14px;
   color: var(--text);
   line-height: 1.5;
   min-width: 0;
   font-size: 16px;
-}
-input:not([type='checkbox']),
-textarea {
-  font-family: Georgia, serif;
 }
 input::placeholder,
 textarea::placeholder {
@@ -384,6 +422,7 @@ textarea {
 .feedback,
 .hint-box,
 .notice {
+  border-radius: 0 14px 14px 0;
   border-left: 3px solid var(--main-color);
   padding: 14px 16px;
   margin-top: 20px;
@@ -487,7 +526,7 @@ textarea {
   border: 0;
   width: 100%;
   height: 460px;
-  background: #faf9f4;
+  background: #f7f6fd;
   margin-top: 14px;
 }
 .hidden-frame {
@@ -699,6 +738,10 @@ textarea {
     flex: 1;
     font-size: 1.1rem;
   }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+  }
   .dojo-header > button {
     order: 1;
   }
@@ -723,7 +766,7 @@ textarea {
     margin-bottom: 24px;
   }
   .workspace-top h1 {
-    font-size: 2.2rem;
+    font-size: 32px;
   }
   .workspace-top > button {
     min-width: 64px;
@@ -777,6 +820,9 @@ textarea {
   height: auto;
   display: block;
   background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 12px 38px var(--scene-shadow);
 }
 .geometry-scene text {
   font:
@@ -791,7 +837,7 @@ textarea {
 .scene-grid {
   stroke: var(--muted);
   stroke-width: 0.6;
-  opacity: 0.12;
+  opacity: 0.15;
 }
 .scene-axes {
   stroke: var(--muted);
@@ -855,6 +901,11 @@ textarea {
   stroke-width: 3;
   fill: none;
 }
+.scene-construction,
+.scene-right-angle,
+.scene-halo {
+  filter: drop-shadow(0 0 4px var(--construction-glow));
+}
 .geometry-scene .scene-angle-label {
   fill: var(--construction);
   font:
@@ -872,6 +923,7 @@ textarea {
   padding: 12px 0;
 }
 .scene-selection button {
+  border-radius: 10px;
   border-bottom: 1px solid var(--line);
   padding: 8px 12px;
   min-height: 44px;
@@ -889,9 +941,8 @@ textarea {
   padding: 14px 0;
   min-height: 48px;
   color: var(--main-color);
-  font:
-    1.15rem Georgia,
-    serif;
+  font-size: 16px;
+  font-weight: 600;
 }
 .concept-comparison {
   padding: 18px 0;
@@ -931,6 +982,9 @@ textarea {
   font-size: 14px;
 }
 @media (max-width: 700px) {
+  .geometry-scene {
+    border-radius: 18px;
+  }
   .geometry-scene text {
     font-size: 32px;
   }
@@ -978,8 +1032,10 @@ textarea {
 }
 .scene-heading h2 {
   font:
-    1.5rem Georgia,
-    serif;
+    650 24px Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: -0.04em;
   margin: 8px 0 18px;
 }
 .scene-caption {
@@ -1003,21 +1059,38 @@ textarea {
 }
 .relation-choices button {
   text-align: left;
-  padding: 12px 16px;
+  padding: 14px 16px;
   min-height: 48px;
   border: 1px solid var(--line);
   color: var(--text);
   font-size: 15px;
-  border-radius: 3px;
+  border-radius: 14px;
+  background: var(--field);
+  transition: none;
 }
-.relation-choices button:hover,
-.relation-choices button[aria-pressed='true'] {
+.relation-choices button:hover {
   border-color: var(--main-color);
   background: var(--card-color);
 }
+.relation-choices button[aria-pressed='true'] {
+  background: var(--selected-bg);
+  border-color: var(--main-color);
+  color: var(--selected-text);
+  box-shadow: 0 4px 16px var(--scene-shadow);
+}
 .concept-tutor form > button {
   margin-top: 16px;
-  min-height: 44px;
+}
+.concept-tutor form > button,
+.tutor-actions button[type='submit'] {
+  border-radius: 14px;
+  padding: 13px 22px;
+  height: auto;
+  min-height: 48px;
+  background: var(--cta-bg);
+  color: var(--cta-text);
+  box-shadow: 0 8px 22px var(--scene-shadow);
+  font-weight: 700;
 }
 .constructed-tool {
   padding-bottom: 18px;
@@ -1051,6 +1124,8 @@ textarea {
   padding: 14px 0;
   color: var(--main-color);
   min-height: 48px;
+  font-size: 16px;
+  font-weight: 600;
 }
 .completion .completion-answer {
   color: var(--main-color);
