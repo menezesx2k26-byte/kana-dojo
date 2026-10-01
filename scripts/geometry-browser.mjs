@@ -613,6 +613,244 @@ try {
     }
     await p.close();
   }
+  for (const [width, height] of report.viewports) {
+    const { page: p, audit } = await open(width, height);
+    await p
+      .getByText('Comparar mediana, altura e mediatriz', { exact: true })
+      .click();
+    const comparison = p.getByRole('region', {
+      name: 'Comparar mediana, altura e mediatriz',
+      exact: true,
+    });
+    const saved = await p.evaluate(() =>
+      localStorage.getItem('geometria-dojo-v1'),
+    );
+    const results = [];
+    for (const mode of ['Mediana', 'Altura', 'Mediatriz']) {
+      await comparison
+        .getByRole('button', { name: new RegExp(`^${mode}`) })
+        .click();
+      if (mode === 'Mediana')
+        await comparison
+          .getByRole('button', {
+            name: 'Arrastar pontos no GeoGebra',
+            exact: true,
+          })
+          .click();
+      await comparison
+        .getByRole('status')
+        .filter({ hasText: /pronta/ })
+        .waitFor({ timeout: 45000 });
+      const frame = await comparison
+        .getByTitle('Construção GeoGebra isolada', { exact: true })
+        .elementHandle()
+        .then(e => e?.contentFrame());
+      assert(frame);
+      const iframe = comparison.getByTitle('Construção GeoGebra isolada', {
+        exact: true,
+      });
+      await iframe.scrollIntoViewIfNeeded();
+      const drag = await frame.evaluate(() => {
+        const api = window.ggbApplet;
+        const cs = new DOMParser()
+          .parseFromString(api.getXML(), 'application/xml')
+          .querySelector('euclidianView coordSystem');
+        return {
+          x:
+            Number(cs.getAttribute('xZero')) +
+            api.getXcoord('A') * Number(cs.getAttribute('scale')),
+          y:
+            Number(cs.getAttribute('yZero')) -
+            api.getYcoord('A') * Number(cs.getAttribute('yscale')),
+          before: api.getXcoord('A'),
+        };
+      });
+      const box = await iframe.boundingBox();
+      assert(box);
+      await p.mouse.move(box.x + drag.x, box.y + drag.y);
+      await p.mouse.down();
+      await p.mouse.move(box.x + drag.x + 25, box.y + drag.y - 20, {
+        steps: 8,
+      });
+      await p.mouse.up();
+      const draggedA = await frame.evaluate(() =>
+        window.ggbApplet.getXcoord('A'),
+      );
+      assert.notEqual(draggedA, drag.before, 'vertex moves with pointer drag');
+      const checks = await frame.evaluate(mode => {
+        const api = window.ggbApplet;
+        const point = name => ({
+          x: api.getXcoord(name),
+          y: api.getYcoord(name),
+        });
+        const sets = [
+          [
+            [2.1, -0.6],
+            [-0.4, 3.2],
+            [1.8, 2.8],
+          ],
+          [
+            [0, -1],
+            [0, 3],
+            [1, 2],
+          ],
+          [
+            [2, 1],
+            [0, 1],
+            [1, 2],
+          ],
+        ];
+        const initialC = point('C');
+        const measurements = sets.map(coords => {
+          ['A', 'B', 'C'].forEach((n, i) => api.setCoords(n, ...coords[i]));
+          const a = point('A'),
+            b = point('B'),
+            c = point('C');
+          if (mode === 'Altura') {
+            const f = point('F');
+            return {
+              perpendicular:
+                (c.x - f.x) * (b.x - a.x) + (c.y - f.y) * (b.y - a.y),
+              onBase: (f.x - a.x) * (b.y - a.y) - (f.y - a.y) * (b.x - a.x),
+              angle: api.getValue('right0'),
+            };
+          }
+          const m = point('M');
+          return {
+            midpointX: m.x - (a.x + b.x) / 2,
+            midpointY: m.y - (a.y + b.y) / 2,
+            equalParts: api.getValue('partAM') - api.getValue('partMB'),
+            angle: mode === 'Mediatriz' ? api.getValue('right0') : null,
+          };
+        });
+        api.setCoords('A', 2, -1);
+        api.setCoords('B', 0, 3);
+        api.setCoords('C', 1, 2);
+        return {
+          initialC,
+          measurements,
+          prematureH: api.exists('H'),
+          equalMarks:
+            mode === 'Altura'
+              ? null
+              : ['partAM', 'partMB'].every(n =>
+                  api.getXML(n).includes('decoration type="1"'),
+                ),
+        };
+      }, mode);
+      assert.deepEqual(
+        checks.initialC,
+        { x: 1, y: 2 },
+        'changing comparison restores its example',
+      );
+      assert.equal(checks.prematureH, false);
+      if (checks.equalMarks !== null)
+        assert.equal(checks.equalMarks, true, 'native congruence marks');
+      for (const values of checks.measurements) {
+        for (const [key, value] of Object.entries(values)) {
+          if (value === null) continue;
+          assert(
+            Math.abs(value - (key === 'angle' ? Math.PI / 2 : 0)) < 1e-8,
+            `${mode}: ${key}`,
+          );
+        }
+      }
+      assert.equal(
+        await frame.evaluate(() => {
+          try {
+            return parent.localStorage.length;
+          } catch {
+            return 'blocked';
+          }
+        }),
+        'blocked',
+      );
+      await capture(
+        p,
+        `comparison-geogebra-${mode.toLowerCase()}-${width}`,
+        comparison,
+      );
+      if (mode === 'Mediatriz') {
+        await frame.evaluate(() => window.ggbApplet.setCoords('B', 2, -1));
+        await frame
+          .getByRole('status')
+          .filter({ hasText: /coincidem/ })
+          .waitFor();
+        await capture(p, `comparison-degenerate-${width}`, comparison);
+        await frame.evaluate(() => window.ggbApplet.setCoords('B', 0, 3));
+        await frame.locator('#comparison-notice').waitFor({ state: 'hidden' });
+      }
+      results.push({
+        mode,
+        pointerDrag: { before: drag.before, after: draggedA },
+        ...checks,
+      });
+    }
+    assert.equal(
+      await p.evaluate(() => localStorage.getItem('geometria-dojo-v1')),
+      saved,
+      'comparison preserves study progress',
+    );
+    assert.equal(
+      await p.getByLabel('Seu resultado').count(),
+      0,
+      'comparison does not unlock algebra',
+    );
+    assert(audit.remote.every(r => r.method === 'GET'));
+    await comparison
+      .getByRole('button', { name: 'Usar visual estático', exact: true })
+      .click();
+    assert.equal(
+      await comparison.locator('svg.geometry-scene').isVisible(),
+      true,
+    );
+    await clean(audit);
+    report.geogebra.push({
+      comparison: true,
+      width,
+      results,
+      isolation: 'blocked',
+      ...audit,
+    });
+    await p.close();
+  }
+  {
+    const { page: p, audit } = await open(390, 844);
+    await p.route('https://www.geogebra.org/**', r => r.abort());
+    await p
+      .getByText('Comparar mediana, altura e mediatriz', { exact: true })
+      .click();
+    const comparison = p.getByRole('region', {
+      name: 'Comparar mediana, altura e mediatriz',
+      exact: true,
+    });
+    await comparison.getByRole('button', { name: /^Altura/ }).click();
+    await comparison
+      .getByRole('button', { name: 'Arrastar pontos no GeoGebra', exact: true })
+      .click();
+    await comparison
+      .getByRole('status')
+      .filter({ hasText: /indisponível/ })
+      .waitFor({ timeout: 45000 });
+    assert.equal(
+      await comparison.locator('[data-mark=right-angle]').count(),
+      1,
+    );
+    await capture(p, 'comparison-geogebra-fallback-mobile', comparison);
+    assert.deepEqual(audit.errors, []);
+    assert(
+      audit.failed.length > 0 &&
+        audit.failed.every(r => r.url.startsWith('https://www.geogebra.org/')),
+    );
+    assert(audit.consoleErrors.every(m => m.includes('ERR_FAILED')));
+    report.geogebra.push({
+      comparison: true,
+      blocked: true,
+      fallback: true,
+      ...audit,
+    });
+    await p.close();
+  }
   writeFileSync(
     resolve(evidence, 'report.json'),
     JSON.stringify(report, null, 2),

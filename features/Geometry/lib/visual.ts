@@ -76,7 +76,46 @@ export function geogebraDocument(visual: Visual): string {
   }
   const names = visual.points.map(p => p.name);
   const dynamic = visual.exploration === 'triangle-altitudes';
+  const comparison = visual.exploration?.startsWith('comparison-') ?? false;
   const hidden: string[] = [];
+  if (comparison) {
+    commands.splice(
+      0,
+      commands.length,
+      ...visual.points
+        .filter(p => ['A', 'B', 'C'].includes(p.name))
+        .map(p => `${p.name}=${coord(p)}`),
+      'seg0=Segment(A,B)',
+      'seg1=Segment(B,C)',
+      'seg2=Segment(C,A)',
+      'baseAB=Line(A,B)',
+    );
+    hidden.push('baseAB');
+    if (visual.exploration === 'comparison-altitude') {
+      commands.push(
+        'altC=PerpendicularLine(C,baseAB)',
+        'F=Intersect(altC,baseAB)',
+        'construction0=Segment(C,F)',
+        'right0=Angle(baseAB,altC)',
+        'extension0=Line(A,B)',
+      );
+      hidden.push('altC');
+      names.push('F');
+    } else {
+      commands.push(
+        'M=Midpoint(A,B)',
+        'partAM=Segment(A,M)',
+        'partMB=Segment(M,B)',
+      );
+      if (visual.exploration === 'comparison-median')
+        commands.push('construction0=Segment(C,M)');
+      else
+        commands.push(
+          'construction0=PerpendicularLine(M,baseAB)',
+          'right0=Angle(baseAB,construction0)',
+        );
+    }
+  }
   if (dynamic) {
     commands.splice(
       0,
@@ -111,15 +150,18 @@ export function geogebraDocument(visual: Visual): string {
       );
   }
   const objects = commands.map(c => c.split(/[=:]/)[0]);
-  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><style>html,body{margin:0;background:#f7f6fd;overflow:hidden}#ggb{width:100vw;height:100vh;overflow:hidden}</style></head><body><div id="ggb"></div><script src="https://www.geogebra.org/apps/deployggb.js" onerror="parent.postMessage({kind:'geometry-ggb',status:'failed'},'*')"></script><script>
+  // The official loader sets inline sizes; the host must follow the iframe viewport.
+  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><style>html,body{margin:0;background:#f7f6fd;overflow:hidden}#ggb{width:100vw!important;height:100vh!important;overflow:hidden}#comparison-notice{position:absolute;top:8px;left:8px;right:8px;padding:10px;background:#f7f6fd;color:#2a2442;border:1px solid #6f42ca;border-radius:10px;font:14px/1.4 Arial,sans-serif}</style></head><body><div id="ggb"></div>${comparison ? '<p id="comparison-notice" role="status" hidden></p>' : ''}<script src="https://www.geogebra.org/apps/deployggb.js" onerror="parent.postMessage({kind:'geometry-ggb',status:'failed'},'*')"></script><script>
   try { const applet = new GGBApplet({appName:'classic',width:window.innerWidth,height:window.innerHeight,language:'pt',showToolBar:false,showAlgebraInput:false,showMenuBar:false,showResetIcon:false,showZoomButtons:true,enableRightClick:false,allowStyleBar:false,showSuggestionButtons:false,preventFocus:true,disableAutoScale:true,appletOnLoad(api){
     try {
       api.setPerspective('G'); api.setAxesVisible(false,false); api.setGridVisible(false);
       for(const command of ${JSON.stringify(commands)}){if(!api.evalCommand(command))throw new Error('construction');}
       for(const name of ${JSON.stringify(objects)}){api.setLabelVisible(name,false);api.setFixed(name,true,false);api.setLineThickness(name,4);api.setColor(name,111,66,202);if(/construction|right|tick/.test(name))api.setColor(name,89,122,16);if(/extension/.test(name))api.setLineStyle(name,1);if(/right/.test(name))api.setLabelStyle(name,2);}
       for(const name of ${JSON.stringify(hidden)})api.setVisible(name,false);
-      for(const name of ${JSON.stringify(dynamic ? objects.filter(n => /^right/.test(n)) : [])})api.setLabelVisible(name,true);
-      for(const name of ${JSON.stringify(names)}){api.setLabelVisible(name,true);api.setLabelStyle(name,0);api.setPointSize(name,5);api.setColor(name,42,36,66);if(${dynamic}&&name!=='H')api.setFixed(name,false,true);}
+      for(const name of ${JSON.stringify(dynamic || comparison ? objects.filter(n => /^right/.test(n)) : [])})api.setLabelVisible(name,true);
+      for(const name of ${JSON.stringify(names)}){api.setLabelVisible(name,true);api.setLabelStyle(name,0);api.setPointSize(name,5);api.setColor(name,42,36,66);if(${dynamic || comparison}&&['A','B','C'].includes(name))api.setFixed(name,false,true);}
+      ${comparison && visual.exploration !== 'comparison-altitude' ? "api.evalCommand('SetDecoration(partAM,1)');api.evalCommand('SetDecoration(partMB,1)');" : ''}
+      ${comparison ? `window.geometryComparisonNotice=()=>{const a={x:api.getXcoord('A'),y:api.getYcoord('A')},b={x:api.getXcoord('B'),y:api.getYcoord('B')},c={x:api.getXcoord('C'),y:api.getYcoord('C')};const cross=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);const scale=Math.max(1,Math.hypot(b.x-a.x,b.y-a.y)*Math.hypot(c.x-a.x,c.y-a.y));const notice=document.getElementById('comparison-notice');notice.hidden=Math.abs(cross)>1e-9*scale;notice.textContent='Os pontos estão alinhados ou coincidem. Afaste um vértice para voltar a formar um triângulo.';};api.registerUpdateListener('geometryComparisonNotice');window.geometryComparisonNotice();` : ''}
       const resize=()=>{const width=window.innerWidth,height=window.innerHeight;api.setSize(width,height);const cx=${(frame.minX + frame.maxX) / 2},cy=${(frame.minY + frame.maxY) / 2},spanY=${frame.maxY - frame.minY};const spanX=spanY*width/height;api.setCoordSystem(cx-spanX/2,cx+spanX/2,cy-spanY/2,cy+spanY/2);};
       resize();window.addEventListener('resize',resize);
       parent.postMessage({kind:'geometry-ggb',status:'ready'},'*');

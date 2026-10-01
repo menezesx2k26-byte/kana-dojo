@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/shared/ui/components/button';
 import { GeometryScene } from './GeometryScene';
 import { visibleVisual } from '../lib/visual';
@@ -10,11 +10,18 @@ export function GeometryVisual({
   id,
   visual,
   validated,
+  title = 'A relação no plano',
+  exploreLabel = 'Explorar no GeoGebra',
+  compact = false,
 }: {
   id: string;
   visual: Visual;
   validated: Record<string, string>;
+  title?: string;
+  exploreLabel?: string;
+  compact?: boolean;
 }) {
+  const headingId = useId();
   const [enabled, setEnabled] = useState(false),
     [revision, setRevision] = useState(0);
   const [appletState, setAppletState] = useState<{
@@ -57,19 +64,25 @@ export function GeometryVisual({
     };
   }, [enabled, document, revision]);
   return (
-    <section className='visual-panel' aria-labelledby='visual-heading'>
-      <div className='panel-heading'>
-        <div>
-          <span className='eyebrow'>ENXERGAR A RELAÇÃO</span>
-          <h2 id='visual-heading'>A relação no plano</h2>
+    <section
+      className='visual-panel'
+      aria-label={compact ? title : undefined}
+      aria-labelledby={compact ? undefined : headingId}
+    >
+      {!compact ? (
+        <div className='panel-heading'>
+          <div>
+            <span className='eyebrow'>ENXERGAR A RELAÇÃO</span>
+            <h2 id={headingId}>{title}</h2>
+          </div>
+          <span className='tiny-badge'>GeoGebra</span>
         </div>
-        <span className='tiny-badge'>GeoGebra</span>
-      </div>
+      ) : null}
       <div
         className={`visual-canvas ${enabled && status === 'ready' ? 'ggb-ready' : ''}`}
       >
         {enabled && status === 'ready' ? null : (
-          <GeometryScene visual={visible} />
+          <GeometryScene visual={visible} title={compact ? title : undefined} />
         )}
         {enabled && document ? (
           <iframe
@@ -86,9 +99,11 @@ export function GeometryVisual({
         ) : null}
       </div>
       <p className='visual-description'>
-        {visual.exploration
+        {visual.exploration === 'triangle-altitudes'
           ? 'Arraste A, B e C para observar como as alturas acompanham o triângulo. Esta exploração não altera os dados do treino ou seu ledger. Reiniciar volta às coordenadas originais.'
-          : visual.description}
+          : compact
+            ? 'Arraste A, B e C e observe o que permanece em cada construção. A comparação usa um triângulo de exemplo. Trocar a construção ou reiniciar restaura seus pontos.'
+            : visual.description}
       </p>
       <div className='visual-actions'>
         <Button
@@ -100,7 +115,7 @@ export function GeometryVisual({
             setRevision(n => n + 1);
           }}
         >
-          {enabled ? 'Reiniciar GeoGebra' : 'Explorar no GeoGebra'}
+          {enabled ? 'Reiniciar GeoGebra' : exploreLabel}
         </Button>
         {enabled && (
           <Button

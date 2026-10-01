@@ -2,6 +2,10 @@ import { writeFileSync, readFileSync, copyFileSync, mkdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { activityList } from '../features/Geometry/data/activities';
 import {
+  comparisonVisual,
+  type ComparisonMode,
+} from '../features/Geometry/lib/comparison';
+import {
   geogebraDocument,
   visibleVisual,
 } from '../features/Geometry/lib/visual';
@@ -31,6 +35,9 @@ for (const activity of activityList) {
       visibleVisual(activity.visual, verified),
     );
   }
+}
+for (const mode of ['median', 'altitude', 'bisector'] as ComparisonMode[]) {
+  documents[`comparacao-${mode}:`] = geogebraDocument(comparisonVisual(mode));
 }
 mkdirSync('geometry/visual-out', { recursive: true });
 const map = JSON.stringify(documents).replace(/</g, '\\u003c');
