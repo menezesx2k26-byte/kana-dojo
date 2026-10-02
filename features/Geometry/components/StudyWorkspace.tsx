@@ -29,6 +29,7 @@ import { GeometryVisual } from './GeometryVisual';
 import { StudyLedger } from './StudyLedger';
 import { RelationTutor } from './RelationTutor';
 import { ConceptComparison } from './ConceptComparison';
+import { GuidedCalculation } from './GuidedCalculation';
 
 const shortName = (id: string) => {
   const q = catalog.find(q => q.id === id)!;
@@ -74,6 +75,8 @@ export function StudyWorkspace({
   );
   const [resetOpen, setResetOpen] = useState(false),
     [clearOpen, setClearOpen] = useState(false);
+  const [manual, setManual] = useState(false);
+  const [calculationVersion, setCalculationVersion] = useState(0);
   const answerInput = useRef<HTMLInputElement>(null);
   const verified = confirmed(session),
     step = currentStep(activity.id, session),
@@ -114,6 +117,7 @@ export function StudyWorkspace({
             setEvidence('');
             setFeedback(null);
             setResetOpen(true);
+            setCalculationVersion(v => v + 1);
           }}
         >
           <RotateCcw size={16} /> RESET
@@ -257,58 +261,92 @@ export function StudyWorkspace({
                 <>
                   <h3>{step.label}</h3>
                   <p className='tutor-question'>{step.prompt}</p>
-                  <form onSubmit={send}>
-                    <label htmlFor='answer'>Seu resultado</label>
-                    <input
-                      id='answer'
-                      ref={answerInput}
-                      autoComplete='off'
-                      maxLength={160}
-                      placeholder={step.placeholder}
-                      value={answer}
-                      onChange={e => setAnswer(e.target.value)}
-                      aria-describedby='notation'
-                      required
+                  <div
+                    className='calculation-mode'
+                    role='group'
+                    aria-label='Como fazer a conta'
+                  >
+                    <button
+                      type='button'
+                      aria-pressed={!manual}
+                      onClick={() => setManual(false)}
+                    >
+                      Passo a passo
+                    </button>
+                    <button
+                      type='button'
+                      aria-pressed={manual}
+                      onClick={() => setManual(true)}
+                    >
+                      Digitar livremente
+                    </button>
+                  </div>
+                  {!manual ? (
+                    <GuidedCalculation
+                      key={`${step.id}-${calculationVersion}`}
+                      id={activity.id}
+                      step={step}
+                      session={session}
+                      onOutcome={outcome => setFeedback(outcome)}
                     />
-                    <p id='notation' className='input-help'>
-                      Frações, decimais exatos e radicais: 1/2, 0.5, sqrt(2)/3.
-                      Para coordenadas com vírgula decimal, use ponto e vírgula
-                      entre x e y.
-                    </p>
-                    <label htmlFor='evidence'>A relação que justifica</label>
-                    <textarea
-                      id='evidence'
-                      rows={2}
-                      maxLength={500}
-                      autoComplete='off'
-                      placeholder='Registre a verificação matemática…'
-                      value={evidence}
-                      onChange={e => setEvidence(e.target.value)}
-                      aria-describedby='proof-help'
-                    />
-                    <p id='proof-help' className='input-help'>
-                      {proofInstructions(activity, step)}
-                    </p>
-                    <div className='tutor-actions'>
-                      <Button type='submit'>
-                        <Check size={16} /> Verificar passo
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        type='button'
-                        onClick={() => store.hint(activity.id, step.id)}
-                      >
-                        <Lightbulb size={16} /> Uma pista
-                      </Button>
-                    </div>
-                  </form>
-                  {(session.hints[step.id] ?? 0) > 0 && (
-                    <div className='hint-box'>
-                      <span className='eyebrow'>
-                        PISTA {session.hints[step.id]}/3 · Derivado
-                      </span>
-                      <p>{step.hints[(session.hints[step.id] ?? 1) - 1]}</p>
-                    </div>
+                  ) : (
+                    <>
+                      <form onSubmit={send}>
+                        <label htmlFor='answer'>Seu resultado</label>
+                        <input
+                          id='answer'
+                          ref={answerInput}
+                          autoComplete='off'
+                          maxLength={160}
+                          placeholder={step.placeholder}
+                          value={answer}
+                          onChange={e => setAnswer(e.target.value)}
+                          aria-describedby='notation'
+                          required
+                        />
+                        <p id='notation' className='input-help'>
+                          Frações, decimais exatos e radicais: 1/2, 0.5,
+                          sqrt(2)/3. Para coordenadas com vírgula decimal, use
+                          ponto e vírgula entre x e y.
+                        </p>
+                        <label htmlFor='evidence'>
+                          A relação que justifica
+                        </label>
+                        <textarea
+                          id='evidence'
+                          rows={2}
+                          maxLength={500}
+                          autoComplete='off'
+                          placeholder='Registre a verificação matemática…'
+                          value={evidence}
+                          onChange={e => setEvidence(e.target.value)}
+                          aria-describedby='proof-help'
+                        />
+                        <p id='proof-help' className='input-help'>
+                          {proofInstructions(activity, step)}
+                        </p>
+                        <div className='tutor-actions'>
+                          <Button type='submit'>
+                            <Check size={16} /> Verificar passo
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            type='button'
+                            onClick={() => store.hint(activity.id, step.id)}
+                          >
+                            <Lightbulb size={16} /> Uma pista
+                          </Button>
+                        </div>
+                      </form>
+                      {(session.hints[step.id] ?? 0) > 0 && (
+                        <div className='hint-box'>
+                          <span className='eyebrow'>
+                            PISTA {session.hints[step.id]}/3 · Derivado
+                          </span>
+                          <p>{step.hints[(session.hints[step.id] ?? 1) - 1]}</p>
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}
@@ -391,6 +429,7 @@ export function StudyWorkspace({
             session={session}
             onReview={e => {
               store.rewind(activity.id, e.step);
+              setCalculationVersion(v => v + 1);
               setAnswer(e.answer);
               setEvidence(e.evidence);
               setFeedback({

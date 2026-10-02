@@ -38,7 +38,10 @@ it('teaches the midpoint relationship before tool selection in an existing sourc
       },
     },
   );
-  expect(screen.getByLabelText('Seu resultado')).toBeTruthy();
+  expect(
+    screen.getByRole('region', { name: 'Conta guiada: Ponto médio' }),
+  ).toBeTruthy();
+  expect(screen.queryByLabelText('Seu resultado')).toBeNull();
 });
 it.each(['lista-2-q15', 'lista-2-q30'])(
   'grounds perpendicularity feedback in the given point and line for %s',

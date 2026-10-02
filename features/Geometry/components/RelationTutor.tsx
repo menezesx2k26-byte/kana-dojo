@@ -95,6 +95,7 @@ export function RelationTutor({
     diagnose = useGeometryStore(s => s.diagnose);
   const [message, setMessage] = useState(''),
     [compare, setCompare] = useState(false);
+  const [note, setNote] = useState('');
   const l = lesson(activity, step);
   return (
     <div className='relation-tutor'>
@@ -144,23 +145,33 @@ export function RelationTutor({
                 key={t}
                 type='button'
                 aria-pressed={session.tool === t}
-                onClick={() => tool(activity.id, t, session.rationale)}
+                onClick={() => tool(activity.id, t, l.meaning)}
               >
                 {t}
               </button>
             ))}
           </div>
-          <label htmlFor='rationale'>
-            Como esta relação aproxima você do alvo?
-          </label>
-          <textarea
-            id='rationale'
-            rows={2}
-            maxLength={1000}
-            value={session.rationale}
-            onChange={e => tool(activity.id, session.tool, e.target.value)}
-            placeholder='Explique como a relação geométrica conduz ao cálculo…'
-          />
+          <details className='optional-reflection'>
+            <summary>Acrescentar uma anotação (opcional)</summary>
+            <label htmlFor='rationale'>
+              Como esta relação aproxima você do alvo?
+            </label>
+            <textarea
+              id='rationale'
+              rows={2}
+              maxLength={1000}
+              value={note}
+              onChange={e => {
+                setNote(e.target.value);
+                tool(
+                  activity.id,
+                  session.tool,
+                  `${l.meaning} ${e.target.value}`,
+                );
+              }}
+              placeholder='Explique como a relação geométrica conduz ao cálculo…'
+            />
+          </details>
         </>
       )}
       {message ? (

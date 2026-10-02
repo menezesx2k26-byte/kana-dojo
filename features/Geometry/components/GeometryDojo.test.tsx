@@ -20,7 +20,9 @@ it('places the geometric figure before algebra inputs and the secondary ledger i
   const figure = await screen.findByRole('img', {
     name: /^A relação geométrica/,
   });
-  const answer = screen.getByLabelText('Seu resultado');
+  const answer = screen.getByRole('region', {
+    name: 'Conta guiada: Ponto médio',
+  });
   const ledger = screen.getByRole('heading', { name: 'LEDGER' });
   expect(
     figure.compareDocumentPosition(answer) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -64,7 +66,10 @@ it('constructs the altitude tool from geometry and treats midpoint confusion bef
     },
   );
   fireEvent.click(screen.getByRole('button', { name: 'Construir a equação' }));
-  expect(screen.getByLabelText('Seu resultado')).toBeTruthy();
+  expect(
+    screen.getByRole('region', { name: 'Conta guiada: Altura por C' }),
+  ).toBeTruthy();
+  expect(screen.queryByLabelText('Seu resultado')).toBeNull();
   expect(
     useGeometryStore.getState().sessions['altura-ortocentro'].firstDivergence
       ?.kind,
@@ -88,6 +93,7 @@ it('moves keyboard focus to the next relationship and asks for a fresh explanati
     { target: { value: 'A altura sai de C e é perpendicular ao lado AB.' } },
   );
   fireEvent.click(screen.getByRole('button', { name: 'Construir a equação' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Digitar livremente' }));
   fireEvent.change(screen.getByLabelText('Seu resultado'), {
     target: { value: 'x-2y+3=0' },
   });

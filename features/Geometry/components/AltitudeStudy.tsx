@@ -74,7 +74,13 @@ export function AltitudeStudy({ session }: { session: Session }) {
   }
   function prepare(event: FormEvent) {
     event.preventDefault();
-    store.tool(id, route, rationale);
+    store.tool(
+      id,
+      route,
+      rationale.trim().length >= 10
+        ? rationale
+        : `A altura passa por ${vertex} e é perpendicular a ${side}.`,
+    );
     setPhase(4);
   }
   function resetLayer() {
@@ -271,14 +277,24 @@ export function AltitudeStudy({ session }: { session: Session }) {
                 <button
                   type='button'
                   aria-pressed={route === activity.tools[0]}
-                  onClick={() => setRoute(activity.tools[0])}
+                  onClick={() => {
+                    setRoute(activity.tools[0]);
+                    setRationale(
+                      `A altura passa por ${vertex} e é perpendicular a ${side}; o produto das inclinações é −1.`,
+                    );
+                  }}
                 >
                   Inclinações · m_lado × m_altura = −1
                 </button>
                 <button
                   type='button'
                   aria-pressed={route === activity.tools[1]}
-                  onClick={() => setRoute(activity.tools[1])}
+                  onClick={() => {
+                    setRoute(activity.tools[1]);
+                    setRationale(
+                      `A altura passa por ${vertex} e é perpendicular a ${side}; o produto dos vetores diretores é zero.`,
+                    );
+                  }}
                 >
                   Vetores · v_lado · v_altura = 0
                 </button>
@@ -288,25 +304,27 @@ export function AltitudeStudy({ session }: { session: Session }) {
                 escalar dos vetores diretores cobre também direções verticais.
               </p>
               <form onSubmit={prepare}>
-                <label htmlFor='concept-rationale'>
-                  Por que esta relação encontra a altura?
-                </label>
-                <textarea
-                  id='concept-rationale'
-                  value={rationale}
-                  onChange={e => setRationale(e.target.value)}
-                  rows={2}
-                  maxLength={1000}
-                  minLength={10}
-                  required
-                  placeholder='Explique como entram o vértice e os 90°…'
-                />
+                <p className='recognized-relation'>
+                  {rationale ||
+                    `A altura precisa passar por ${vertex} e ser perpendicular a ${side}.`}
+                </p>
+                <details className='optional-reflection'>
+                  <summary>Acrescentar uma anotação (opcional)</summary>
+                  <label htmlFor='concept-rationale'>
+                    Por que esta relação encontra a altura?
+                  </label>
+                  <textarea
+                    id='concept-rationale'
+                    value={rationale}
+                    onChange={e => setRationale(e.target.value)}
+                    rows={2}
+                    maxLength={1000}
+                    placeholder='Explique como entram o vértice e os 90°…'
+                  />
+                </details>
                 <Button
                   type='submit'
-                  disabled={
-                    !activity.tools.slice(0, 2).includes(route) ||
-                    rationale.trim().length < 10
-                  }
+                  disabled={!activity.tools.slice(0, 2).includes(route)}
                 >
                   Construir a equação
                 </Button>

@@ -94,6 +94,9 @@ async function clean(audit) {
   assert.deepEqual(audit.failed, [], 'failed requests');
 }
 async function answer(page, result, proof) {
+  await page
+    .getByRole('button', { name: 'Digitar livremente', exact: true })
+    .click();
   await page.getByLabel('Seu resultado').fill(result);
   await page.getByLabel('A relação que justifica', { exact: true }).fill(proof);
   await page
@@ -107,9 +110,6 @@ async function prepare(page, v, side) {
     .getByRole('button', { name: 'Perpendicular · 90°', exact: true })
     .click();
   await page.getByRole('button', { name: /Inclinações ·/ }).click();
-  await page
-    .getByLabel('Por que esta relação encontra a altura?')
-    .fill(`A altura passa por ${v} e é perpendicular ao lado ${side}.`);
   await page
     .getByRole('button', { name: 'Construir a equação', exact: true })
     .click();
@@ -254,10 +254,10 @@ try {
     await stage('perpendicular-c');
     await p.getByRole('button', { name: /Inclinações ·/ }).click();
     await p
-      .getByLabel('Por que esta relação encontra a altura?')
-      .fill('A perpendicular passa por C e forma 90 graus com AB.');
-    await p
       .getByRole('button', { name: 'Construir a equação', exact: true })
+      .click();
+    await p
+      .getByRole('button', { name: 'Digitar livremente', exact: true })
       .click();
     assert.equal(
       await p
@@ -348,6 +348,9 @@ try {
       .getByRole('button', { name: 'Revisar esta etapa' })
       .click();
     await noH(p);
+    await p
+      .getByRole('button', { name: 'Digitar livremente', exact: true })
+      .click();
     assert.equal(await p.getByLabel('Seu resultado').inputValue(), 'y=x-3');
     assert.match(await p.locator('.ledger-list').innerText(), /y-2=/);
     await p
@@ -470,11 +473,6 @@ try {
     }
     await p.locator('.protocol-panel .relation-choices button').first().click();
     await p.locator('.protocol-panel .relation-choices button').first().click();
-    await p
-      .getByLabel('Como esta relação aproxima você do alvo?')
-      .fill(
-        'A relação geométrica determina os objetos e sua tradução algébrica.',
-      );
     for (const [result, proof] of inputs) await answer(p, result, proof);
     await p
       .getByRole('heading', { name: 'Você construiu a solução.' })
@@ -592,7 +590,12 @@ try {
       await p.setViewportSize({ width: 390, height: 844 });
       await capture(p, 'geogebra-fallback-mobile', panel);
       await prepare(p, 'A', 'BC');
-      assert.equal(await p.getByLabel('Seu resultado').isVisible(), true);
+      assert.equal(
+        await p
+          .getByRole('region', { name: 'Conta guiada: Altura por A' })
+          .isVisible(),
+        true,
+      );
       assert.deepEqual(audit.errors, []);
       assert(
         audit.failed.length > 0 &&
