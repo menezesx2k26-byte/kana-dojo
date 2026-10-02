@@ -8,7 +8,7 @@ import { emptySession, submit } from '../features/Geometry/lib/tutor';
 
 const base = process.env.GEOMETRY_BASE_URL ?? 'http://127.0.0.1:3100';
 const evidence = resolve(
-  process.env.GEOMETRY_EVIDENCE_DIR ?? 'geometry/guided-browser-evidence',
+  process.env.GEOMETRY_EVIDENCE_DIR ?? 'geometry/browser-evidence/guided',
 );
 mkdirSync(evidence, { recursive: true });
 const browser = await chromium.launch({
